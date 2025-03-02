@@ -1,0 +1,110 @@
+// Prisma Schema
+//
+// This schema defines the database structure and relationships for the application.
+// It uses PostgreSQL as the database provider and includes models for:
+// - Users
+// - AI Agents
+// - Tokens
+// - Interactions
+//
+// The schema implements:
+// - Proper foreign key relationships
+// - Cascading deletes where appropriate
+// - Indexes for performance
+// - Field constraints and validation
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  email        String        @unique
+  password     String
+  role         String        @default("USER")
+  monadBalance Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  agents       Agent[]
+  Token        Token[]
+  Interaction  Interaction[]
+
+  @@index([email])
+}
+
+// AI Agent Model
+// Represents AI agents that can be traded and interacted with
+model Agent {
+  id          Int           @id @default(autoincrement())
+  name        String
+  symbol      String        @unique
+  description String?
+  price       Float
+  marketCap   Float
+  logo        String? // Add this field
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  creator     User          @relation(fields: [creatorId], references: [id])
+  creatorId   Int
+  Token       Token[]
+  Interaction Interaction[]
+
+  @@index([creatorId])
+  @@index([symbol])
+}
+
+// Token Model
+// Represents ownership tokens for AI agents
+model Token {
+  id        Int      @id @default(autoincrement())
+  amount    Int // Number of tokens owned
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  Int
+  agent   Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agentId Int
+
+  @@unique([userId, agentId]) // Prevent duplicate token entries
+  @@index([userId])
+  @@index([agentId])
+}
+
+// Interaction Model
+// Records interactions between users and AI agents
+model Interaction {
+  id        Int      @id @default(autoincrement())
+  prompt    String   @db.Text // User input
+  response  String   @db.Text // AI response
+  createdAt DateTime @default(now())
+
+  // Relationships
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  Int
+  agent   Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agentId Int
+
+  @@index([userId])
+  @@index([agentId])
+  @@index([createdAt]) // Index for chronological queries
+}
+
+// Add this model to your schema
+model VerificationCode {
+  id        Int      @id @default(autoincrement())
+  email     String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email, code])
+  @@index([email, expiresAt])
+}
