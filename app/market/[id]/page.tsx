@@ -114,6 +114,7 @@ export default function AgentDetailsPage() {
                   width={64}
                   height={64}
                   className="rounded-full"
+                  unoptimized={agent.logo?.startsWith("data:")}
               />
               <div>
                 <h1 className="text-2xl font-bold">{agent.name}</h1>
@@ -211,6 +212,14 @@ export default function AgentDetailsPage() {
                       <CardTitle className="text-sm font-medium">Holders</CardTitle>
                     </CardHeader>
                     <CardContent>
+                      <Image
+                          className="h-10 w-10 rounded-full"
+                          src={agent.logo || "/placeholder.svg"}
+                          alt=""
+                          width={40}
+                          height={40}
+                          unoptimized={agent.logo?.startsWith("data:")}
+                      />
                       <div className="text-2xl font-bold">{agent.holders ? formatNumber(agent.holders) : "N/A"}</div>
                     </CardContent>
                   </Card>

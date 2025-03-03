@@ -70,10 +70,15 @@ export default function CreateAgentPage() {
 
     setIsUploading(true)
     try {
-      // Simulate image upload
-      await new Promise((resolve) => setTimeout(resolve, 1500)) // Simulate upload time
-      const imageUrl = URL.createObjectURL(file)
-      setAvatar(imageUrl)
+      // Convert file to base64
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
+
+      setAvatar(base64)
       toast.success("Avatar uploaded successfully!")
     } catch (error) {
       console.error("Error uploading file:", error)

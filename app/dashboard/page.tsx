@@ -197,6 +197,7 @@ export default function DashboardPage() {
                                 width={40}
                                 height={40}
                                 className="rounded-full"
+                                unoptimized={agent.logo?.startsWith("data:")}
                             />
                             <div>
                               <h3 className="font-medium">{agent.name}</h3>

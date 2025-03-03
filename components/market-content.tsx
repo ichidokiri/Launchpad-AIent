@@ -156,6 +156,7 @@ export default function MarketContent() {
                                                 width={32}
                                                 height={32}
                                                 className="rounded-full"
+                                                unoptimized={agent.logo?.startsWith("data:")}
                                             />
                                             <div>
                                                 <div className="flex items-center gap-1">
