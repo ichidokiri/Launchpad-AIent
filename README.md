@@ -53,45 +53,71 @@ aient/
 ## 📦 Installation
 
 sudo apt update && sudo apt upgrade -y
+
 sudo apt install git curl -y
+
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - sudo apt install -y nodejs
+
 sudo npm install -g pnpm
+
 node -v
+
 npm -v
+
 pnpm -v
 
 
 git clone https://github.com/ichidokiri/Launchpad-AIent.git
+
 cd Launchpad-AIent
+
 (copy .env to the current folder)
+
 git pull origin main
 
 
 pnpm install
+
 sudo apt update && sudo apt install postgresql postgresql-contrib -y
+
 sudo systemctl start postgresql
+
 sudo systemctl enable postgresql  # Enable it to start on boot
+
 sudo systemctl status postgresql  # Check if it’s running
+
 sudo -i -u postgres
+
 psql
+
 CREATE DATABASE launchpad_database;
+
 ALTER USER postgres WITH PASSWORD 'XXXXX';
+
 \q
+
 exit
 
 
 pnpm prisma generate
+
 pnpm prisma db push
 
 pnpm build
+
 pnpm start
+
 (pnpm dev)
 
 
 sudo apt update && sudo apt install nginx -y
+
 sudo systemctl status nginx
+
 sudo systemctl start nginx
+
 sudo systemctl enable nginx
+
 sudo nano /etc/nginx/sites-available/tradegpt
 
 ```
@@ -115,15 +141,21 @@ server {
 ```
 
 sudo ln -s /etc/nginx/sites-available/tradegpt /etc/nginx/sites-enabled/
+
 sudo nginx -t
+
 sudo systemctl restart nginx
 
 sudo apt install certbot python3-certbot-nginx -y
+
 sudo certbot --nginx -d tradegpt.site -d www.tradegpt.site
+
 sudo certbot renew --dry-run
 
 cd ~/launchpad/Launchpad-AIent
+
 pnpm build
+
 pnpm start
 
 
