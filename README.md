@@ -73,8 +73,6 @@ cd Launchpad-AIent
 
 (copy .env to the current folder)
 
-git pull origin main
-
 
 pnpm install
 
@@ -153,6 +151,8 @@ sudo certbot --nginx -d tradegpt.site -d www.tradegpt.site
 sudo certbot renew --dry-run
 
 cd ~/launchpad/Launchpad-AIent
+
+git pull origin main
 
 pnpm build
 
