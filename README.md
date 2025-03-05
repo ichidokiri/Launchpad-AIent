@@ -2,7 +2,9 @@
 
 AIent is a decentralized marketplace for creating, trading, and interacting with AI agents. Built with Next.js 14, TypeScript, and Prisma.
 
+——————————————————————————————————————
 ## 🌟 Features
+——————————————————————————————————————
 
 - 🔐 User authentication with JWT and secure session management
 - 💼 AI agent creation and management
@@ -12,7 +14,9 @@ AIent is a decentralized marketplace for creating, trading, and interacting with
 - 🌓 Dark/Light mode support
 - 📱 Responsive design
 
+——————————————————————————————————————
 ## 🚀 Tech Stack
+——————————————————————————————————————
 
 - **Framework:** Next.js 14 (App Router)
 - **Language:** TypeScript
@@ -25,7 +29,10 @@ AIent is a decentralized marketplace for creating, trading, and interacting with
 - **Email Service:** Mailgun
 - **AI Integration:** OpenAI API
 
+——————————————————————————————————————
 ## 📁 Project Structure
+——————————————————————————————————————
+
 aient/
 ├── app/                    # Next.js app directory
 
@@ -50,13 +57,17 @@ aient/
 └── types/                # TypeScript type definitions
 
 
+——————————————————————————————————————
 ## 📦 Installation
+——————————————————————————————————————
 
 sudo apt update && sudo apt upgrade -y
 
 sudo apt install git curl -y
 
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - sudo apt install -y nodejs
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+
+sudo apt install -y nodejs
 
 sudo npm install -g pnpm
 
@@ -67,12 +78,11 @@ npm -v
 pnpm -v
 
 
-git clone https://github.com/ichidokiri/Launchpad-AIent.git
+git clone https://([privateKey])@github.com/ichidokiri/Launchpad-AIent.git
 
 cd Launchpad-AIent
 
-(copy .env to the current folder)
-
+nano .env  # copy .env to the current folder
 
 pnpm install
 
@@ -90,12 +100,9 @@ psql
 
 CREATE DATABASE launchpad_database;
 
-ALTER USER postgres WITH PASSWORD 'XXXXX';
+ALTER USER postgres WITH PASSWORD 'Prisma,.Postgre11';
 
 \q
-
-exit
-
 
 pnpm prisma generate
 
@@ -107,7 +114,6 @@ pnpm start
 
 (pnpm dev)
 
-
 sudo apt update && sudo apt install nginx -y
 
 sudo systemctl status nginx
@@ -116,26 +122,42 @@ sudo systemctl start nginx
 
 sudo systemctl enable nginx
 
-sudo nano /etc/nginx/sites-available/tradegpt
-
+sudo nano /etc/nginx/sites-available/tradegpt.site
 ```
 server {
     listen 80;
     server_name tradegpt.site www.tradegpt.site;
 
     location / {
-        proxy_pass http://localhost:3000;
+        proxy_pass http://127.0.0.1:3000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
         proxy_cache_bypass $http_upgrade;
+    }
 
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+    # Redirect HTTP to HTTPS
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name tradegpt.site www.tradegpt.site;
+
+    ssl_certificate /etc/letsencrypt/live/tradegpt.site/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/tradegpt.site/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
     }
 }
+
 ```
 
 sudo ln -s /etc/nginx/sites-available/tradegpt /etc/nginx/sites-enabled/
@@ -146,9 +168,21 @@ sudo systemctl restart nginx
 
 sudo apt install certbot python3-certbot-nginx -y
 
+curl -s ifconfig.me
+
+(set the DNS for your domain. example: tradegpt.site)
+
+sudo apt update
+
+sudo apt install -y certbot python3-certbot-nginx
+
 sudo certbot --nginx -d tradegpt.site -d www.tradegpt.site
 
 sudo certbot renew --dry-run
+
+sudo ufw allow 3000/tcp
+
+sudo systemctl restart nginx
 
 cd ~/launchpad/Launchpad-AIent
 
@@ -158,7 +192,27 @@ pnpm build
 
 pnpm start
 
+——————————————————————————————————————
+## 🩺 Health Check
+——————————————————————————————————————
 
+pnpm add dotenv
+
+pnpm exec dotenv -e .env -- node check-db.mjs
+
+——————————————————————————————————————
+## 🔄 Update
+——————————————————————————————————————
+
+git pull origin main
+
+pnpm build
+
+pnpm start
+
+——————————————————————————————————————
+## Others 
+——————————————————————————————————————
 npm install -g pm2
 pm2 start "pnpm start" --name tradegpt
 pm2 startup
