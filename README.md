@@ -2,7 +2,7 @@
 
 AIent is a decentralized marketplace for creating, trading, and interacting with AI agents. Built with Next.js 14, TypeScript, and Prisma.
 
-——————————————————————————————————————
+—————————————————————————
 ## 🌟 Features
 
 - 🔐 User authentication with JWT and secure session management
@@ -13,7 +13,7 @@ AIent is a decentralized marketplace for creating, trading, and interacting with
 - 🌓 Dark/Light mode support
 - 📱 Responsive design
 
-——————————————————————————————————————
+—————————————————————————
 ## 🚀 Tech Stack
 
 - **Framework:** Next.js 14 (App Router)
@@ -27,7 +27,7 @@ AIent is a decentralized marketplace for creating, trading, and interacting with
 - **Email Service:** Mailgun
 - **AI Integration:** OpenAI API
 
-——————————————————————————————————————
+—————————————————————————
 ## 📁 Project Structure
 
 aient/
@@ -54,7 +54,7 @@ aient/
 └── types/                # TypeScript type definitions
 
 
-——————————————————————————————————————
+—————————————————————————
 ## 📦 Installation
 
 sudo apt update && sudo apt upgrade -y
@@ -188,14 +188,15 @@ pnpm build
 
 pnpm start
 
-——————————————————————————————————————
+—————————————————————————
 ## 🩺 Health Check
 
 pnpm add dotenv
 
-pnpm exec dotenv -e .env -- node check-db.mjs
+pnpm exec node -r dotenv/config check-db.mjs
 
-——————————————————————————————————————
+
+—————————————————————————
 ## 🔄 Update
 
 git pull origin main
@@ -204,7 +205,7 @@ pnpm build
 
 pnpm start
 
-——————————————————————————————————————
+—————————————————————————
 ## Others 
 
 npm install -g pm2
