@@ -93,6 +93,18 @@ body {
   }
 }
 
+/* Custom styles for Select component to match the theme */
+[data-radix-popper-content-wrapper] {
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+}
+
+/* Custom styles for tabs */
+[data-state="active"] {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+}
+
 .grid-background {
   background-image: linear-gradient(to right, hsla(var(--grid-color), 0.1) 1px, transparent 1px),
   linear-gradient(to bottom, hsla(var(--grid-color), 0.1) 1px, transparent 1px);
