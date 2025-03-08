@@ -1,6 +1,11 @@
 # AIent - AI Agent Marketplace
 
-AIent is a decentralized marketplace for creating, trading, and interacting with AI agents. Built with Next.js 14, TypeScript, and Prisma.
+### Comprehensive Analysis of TradeGPT Launchpad Project
+
+## 1. Project Overview
+
+TradeGPT Launchpad is a platform for creating, managing, and trading AI agents. It's built with Next.js using the App Router architecture and integrates with a PostgreSQL database via Prisma ORM. 
+The application provides user authentication, AI agent creation and management, a marketplace for AI agents, and an AI assistant for trading insights.
 
 —————————————————————————
 ## 🌟 Features
@@ -189,12 +194,36 @@ pnpm build
 pnpm start
 
 —————————————————————————
+## 🗑️ Cache Cleaning Steps
+
+npm run clean
+
+(or)
+
+node clear-cache.mjs
+
+If the automated script doesn't work, you can manually clean the Next.js cache with these steps:
+
+1. Stop any running Next.js processes
+
+2. Delete the following directories:
+   - `.next` folder (Next.js build output)
+   - `node_modules/.cache` folder (Webpack/Babel cache)
+
+3. On Windows, use these commands in PowerShell:
+   ```powershell
+   Remove-Item -Path .next -Recurse -Force -ErrorAction SilentlyContinue
+   Remove-Item -Path node_modules/.cache -Recurse -Force -ErrorAction SilentlyContinue
+
+—————————————————————————
+
 ## 🩺 Health Check
 
 pnpm add dotenv
 
 pnpm exec node -r dotenv/config check-db.mjs
 
+tsc --noEmit
 
 —————————————————————————
 ## 🔄 Update
