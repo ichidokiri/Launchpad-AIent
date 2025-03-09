@@ -13,10 +13,10 @@ export async function generateCSRFToken() {
 
   // Sign the hash in a JWT
   const jwt = await new SignJWT({ hash })
-      .setProtectedHeader({ alg: "HS256" })
-      .setIssuedAt()
-      .setExpirationTime("1h")
-      .sign(secret)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("1h")
+    .sign(secret)
 
   // Set the JWT in a cookie
   cookies().set("csrf", jwt, {

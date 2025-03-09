@@ -1,9 +1,9 @@
 // Alternative configuration format
 const config = {
-    plugins: {
-        tailwindcss: {},
-        autoprefixer: {},
-    },
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
 }
 
 module.exports = config

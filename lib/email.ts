@@ -1,45 +1,128 @@
-import FormData from "form-data"
-import Mailgun from "mailgun.js"
+/**
+ * Email utility functions for sending verification and password reset emails
+ */
 
-const mailgun = new Mailgun(FormData)
-const mg = mailgun.client({
-    username: "api",
-    key: process.env.MAILGUN_API_KEY || "",
-    url: process.env.MAILGUN_URL, // Optional
-})
+// Define a type for the error structure we're expecting
+interface MailgunError {
+  response?: {
+    data?: any
+    status?: number
+    headers?: any
+  }
+  message?: string
+}
 
-const MAILGUN_DOMAIN = process.env.MAILGUN_DOMAIN || ""
-const FROM_EMAIL = process.env.FROM_EMAIL || `noreply@${MAILGUN_DOMAIN}`
+/**
+ * Sends a verification email to the user
+ * @param email The recipient's email address
+ * @param code The verification code
+ * @returns Promise<boolean> indicating success or failure
+ */
+export async function sendVerificationEmail(email: string, code: string): Promise<boolean> {
+  try {
+    // Create URLSearchParams instead of FormData for compatibility with fetch
+    const formData = new URLSearchParams()
+    formData.append("from", `TradeGPT <${process.env.FROM_EMAIL}>`)
+    formData.append("to", email)
+    formData.append("subject", "Verify your TradeGPT account")
+    formData.append("text", `Your verification code is: ${code}`)
+    formData.append(
+      "html",
+      `
+      <h1>Verify your TradeGPT account</h1>
+      <p>Your verification code is: <strong>${code}</strong></p>
+      <p>This code will expire in 15 minutes.</p>
+    `,
+    )
 
-export async function sendVerificationEmail(to: string, code: string) {
-    try {
-        const data = await mg.messages.create(MAILGUN_DOMAIN, {
-            from: FROM_EMAIL,
-            to: [to],
-            subject: "Verify your AIent account",
-            text: `Your verification code is: ${code}`,
-            html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #333;">Welcome to AIent! 👋</h2>
-          <p style="color: #666; font-size: 16px;">Please use the following code to verify your account:</p>
-          <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
-            <span style="font-size: 32px; letter-spacing: 8px; font-weight: bold; color: #333;">${code}</span>
-          </div>
-          <p style="color: #666; font-size: 14px;">This code will expire in 10 minutes.</p>
-          <p style="color: #666; font-size: 14px;">If you didn't request this verification, please ignore this email.</p>
-        </div>
-      `,
-        })
+    // Send the email using Mailgun API
+    const response = await fetch(`${process.env.MAILGUN_URL}/messages`, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${Buffer.from(`api:${process.env.MAILGUN_API_KEY}`).toString("base64")}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: formData,
+    })
 
-        return { success: true, data }
-    } catch (error) {
-        console.error("Failed to send verification email:", error)
-        if (error.response) {
-            console.error("Response data:", error.response.data)
-            console.error("Response status:", error.response.status)
-            console.error("Response headers:", error.response.headers)
-        }
-        return { success: false, error }
+    if (!response.ok) {
+      throw new Error(`Failed to send email: ${response.statusText}`)
     }
+
+    return true
+  } catch (error: unknown) {
+    console.error("Failed to send verification email:", error)
+
+    // Type check the error before accessing its properties
+    if (error && typeof error === "object" && "response" in error) {
+      const mailgunError = error as MailgunError
+      if (mailgunError.response) {
+        console.error("Response data:", mailgunError.response.data)
+        console.error("Response status:", mailgunError.response.status)
+        console.error("Response headers:", mailgunError.response.headers)
+      }
+    }
+
+    // Return false to indicate failure
+    return false
+  }
+}
+
+/**
+ * Sends a password reset email to the user
+ * @param email The recipient's email address
+ * @param resetToken The password reset token
+ * @param resetUrl The complete URL for password reset
+ * @returns Promise<boolean> indicating success or failure
+ */
+export async function sendPasswordResetEmail(email: string, resetToken: string, resetUrl: string): Promise<boolean> {
+  try {
+    // Create URLSearchParams instead of FormData for compatibility with fetch
+    const formData = new URLSearchParams()
+    formData.append("from", `TradeGPT <${process.env.FROM_EMAIL}>`)
+    formData.append("to", email)
+    formData.append("subject", "Reset your TradeGPT password")
+    formData.append("text", `Your password reset link: ${resetUrl}`)
+    formData.append(
+      "html",
+      `
+      <h1>Reset your TradeGPT password</h1>
+      <p>Click the link below to reset your password:</p>
+      <p><a href="${resetUrl}">Reset Password</a></p>
+      <p>This link will expire in 15 minutes.</p>
+    `,
+    )
+
+    // Send the email using Mailgun API
+    const response = await fetch(`${process.env.MAILGUN_URL}/messages`, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${Buffer.from(`api:${process.env.MAILGUN_API_KEY}`).toString("base64")}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: formData,
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to send email: ${response.statusText}`)
+    }
+
+    return true
+  } catch (error: unknown) {
+    console.error("Failed to send password reset email:", error)
+
+    // Type check the error before accessing its properties
+    if (error && typeof error === "object" && "response" in error) {
+      const mailgunError = error as MailgunError
+      if (mailgunError.response) {
+        console.error("Response data:", mailgunError.response.data)
+        console.error("Response status:", mailgunError.response.status)
+        console.error("Response headers:", mailgunError.response.headers)
+      }
+    }
+
+    // Return false to indicate failure
+    return false
+  }
 }
 

@@ -1,53 +1,61 @@
 "use client"
 
+import type React from "react"
+import { useEffect, useRef } from "react"
 import { cn } from "@/lib/utils"
-import { forwardRef, useRef, useEffect, useCallback, type TextareaHTMLAttributes } from "react"
+import { Textarea } from "@/components/ui/textarea"
 
-interface AutoResizeTextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange"> {
-    value: string
-    onChange: (value: string) => void
+interface AutoResizeTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  minRows?: number
+  maxRows?: number
 }
 
-export const AutoResizeTextarea = forwardRef<HTMLTextAreaElement, AutoResizeTextareaProps>(
-    ({ className, value, onChange, ...props }, ref) => {
-        const textareaRef = useRef<HTMLTextAreaElement>(null)
+export function AutoResizeTextarea({
+  value,
+  minRows = 1,
+  maxRows = 5,
+  className,
+  onChange,
+  ...props
+}: AutoResizeTextareaProps) {
+  // Fix: Change the ref type to explicitly include null
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
-        const resizeTextarea = useCallback(() => {
-            const textarea = textareaRef.current
-            if (textarea) {
-                textarea.style.height = "auto"
-                textarea.style.height = `${textarea.scrollHeight}px`
-            }
-        }, [])
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (onChange) {
+      onChange(e)
+    }
+    adjustHeight()
+  }
 
-        useEffect(() => {
-            resizeTextarea()
-        }, [resizeTextarea])
+  const adjustHeight = () => {
+    const textarea = textareaRef.current
+    if (!textarea) return
 
-        return (
-            <textarea
-                {...props}
-                ref={(node) => {
-                    // Forward the ref
-                    if (typeof ref === "function") {
-                        ref(node)
-                    } else if (ref) {
-                        ref.current = node
-                    }
-                    // Keep our internal ref
-                    textareaRef.current = node
-                }}
-                value={value}
-                rows={1}
-                onChange={(e) => {
-                    onChange(e.target.value)
-                    resizeTextarea()
-                }}
-                className={cn("resize-none min-h-4 max-h-80", className)}
-            />
-        )
-    },
-)
+    textarea.style.height = "auto"
+    const newHeight = Math.min(
+      Math.max(textarea.scrollHeight, minRows * 24), // Assuming 24px per row
+      maxRows * 24,
+    )
+    textarea.style.height = `${newHeight}px`
+  }
 
-AutoResizeTextarea.displayName = "AutoResizeTextarea"
+  useEffect(() => {
+    adjustHeight()
+  }, [value])
+
+  return (
+    <Textarea
+      ref={(node) => {
+        // Now this assignment is valid because we've properly typed the ref
+        textareaRef.current = node
+      }}
+      value={value || ""}
+      rows={1}
+      onChange={handleChange}
+      className={cn("resize-none overflow-hidden", className)}
+      {...props}
+    />
+  )
+}
 

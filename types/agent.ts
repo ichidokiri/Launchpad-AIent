@@ -1,27 +1,29 @@
-export type AgentStatus = "active" | "pending" | "paused"
-
 export interface Agent {
-    id: number
-    name: string
-    symbol: string
-    description?: string | null
-    price: number
-    marketCap: number
-    createdAt: string
-    updatedAt: string
-    creatorId: number
-    logo?: string
-    contractAddress?: string
-    totalSupply?: number
-    holders?: number
-    verified?: boolean
-    status?: AgentStatus
+  id: string
+  name: string
+  symbol: string
+  logo?: string
+  contractAddress?: string // Add this property
+  verified?: boolean // Add this property
+  price: string | number
+  marketCap: string | number
+  createdAt: string
+  updatedAt?: string
+  creatorId: string
+  description?: string
+  model?: string
+  systemPrompt?: string
+  category?: string
+  isPublic?: boolean
+  status?: string
+  totalSupply?: number // Add this property
+  holders?: number // Add this property
+  creator?: {
+    id: string
+    name?: string
+    email: string
+  }
 }
 
-export interface AgentWithCreator extends Agent {
-    creator: {
-        id: number
-        email: string
-    }
-}
+export type AgentWithCreator = Agent
 

@@ -1,26 +1,10 @@
-export type UserRole = "USER" | "ADMIN"
-export type UserStatus = "active" | "inactive" | "suspended"
+export type UserRole = "user" | "admin" | "superadmin"
 
-export interface UserData {
+export interface AuthUser {
   id: string
   email: string
-  status: UserStatus
   role: UserRole
-  monadBalance?: number
-  createdAt: string
-  updatedAt: string
-}
-
-export interface AuthState {
-  user: UserData | null
-  isLoading: boolean
-  error: string | null
-}
-
-export interface AuthResponse {
-  success: boolean
-  message?: string
-  user?: TokenPayload
+  username?: string
 }
 
 export interface TokenPayload {
@@ -29,12 +13,5 @@ export interface TokenPayload {
   role: UserRole
   iat?: number
   exp?: number
-}
-
-export interface RefreshTokenResponse {
-  success: boolean
-  message?: string
-  userData?: Omit<UserData, "password">
-  newToken?: string
 }
 

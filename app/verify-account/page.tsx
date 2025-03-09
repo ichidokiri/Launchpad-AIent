@@ -117,99 +117,99 @@ export default function VerifyAccountPage() {
   }
 
   return (
-      <div className="min-h-screen w-full sm:w-auto flex items-center justify-center p-4 sm:p-0">
-        <Link
-            href="/forgot-password"
-            className="fixed top-4 left-4 p-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 z-50"
-        >
-          <ArrowLeft className="h-5 w-5 text-black dark:text-white opacity-70" />
-        </Link>
+    <div className="min-h-screen w-full sm:w-auto flex items-center justify-center p-4 sm:p-0">
+      <Link
+        href="/forgot-password"
+        className="fixed top-4 left-4 p-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 z-50"
+      >
+        <ArrowLeft className="h-5 w-5 text-black dark:text-white opacity-70" />
+      </Link>
 
-        <div className="w-full max-w-md min-h-[700px] space-y-8 bg-background border border-border rounded-3xl p-4 sm:p-8 shadow-xl relative z-10">
-          <div className="flex flex-col min-h-[480px]">
-            {/* Logo and Text Section */}
-            <div className="flex flex-col items-center justify-start space-y-6">
-              <div className="w-24 h-24">
-                <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-RB1wlyGjhABEyhpwuZsvED6ZCpgyHC.png"
-                    alt="Kanegi Logo"
-                    width={96}
-                    height={96}
-                    className="object-contain dark:invert"
-                />
+      <div className="w-full max-w-md min-h-[700px] space-y-8 bg-background border border-border rounded-3xl p-4 sm:p-8 shadow-xl relative z-10">
+        <div className="flex flex-col min-h-[480px]">
+          {/* Logo and Text Section */}
+          <div className="flex flex-col items-center justify-start space-y-6">
+            <div className="w-24 h-24">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-RB1wlyGjhABEyhpwuZsvED6ZCpgyHC.png"
+                alt="Kanegi Logo"
+                width={96}
+                height={96}
+                className="object-contain dark:invert"
+              />
+            </div>
+            <h1 className="text-2xl font-light text-black dark:text-white">Welcome To Kanegi 👋</h1>
+            <div className="space-y-2 text-center">
+              <p className="text-black dark:text-white">
+                Code has been send to <span className="font-medium">{email}</span>
+              </p>
+              <p className="text-black dark:text-white">Enter the code to verify your account.</p>
+            </div>
+          </div>
+
+          {/* Form Section */}
+          <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between mt-6">
+            <div className="space-y-6">
+              {/* OTP Input */}
+              <div className="flex justify-center gap-4">
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={inputRefs[index]}
+                    type="text"
+                    pattern="[0-9]*"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(index, e.target.value.replace(/[^0-9]/g, ""))}
+                    onKeyDown={(e) => handleKeyDown(index, e)}
+                    className="w-12 h-12 text-center text-lg bg-white/10 dark:bg-white/5 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-black dark:text-white"
+                  />
+                ))}
               </div>
-              <h1 className="text-2xl font-light text-black dark:text-white">Welcome To Kanegi 👋</h1>
-              <div className="space-y-2 text-center">
-                <p className="text-black dark:text-white">
-                  Code has been send to <span className="font-medium">{email}</span>
+
+              {error && <p className="text-red-500 text-xs text-center">{error}</p>}
+
+              {/* Resend Code */}
+              <div className="text-center space-y-2">
+                <p className="text-black dark:text-white text-sm">
+                  Didn't Receive Code?{" "}
+                  <button
+                    type="button"
+                    onClick={handleResendCode}
+                    className={`text-[#4285f4] ${!canResend && "opacity-50 cursor-not-allowed"}`}
+                    disabled={!canResend}
+                  >
+                    Resend Code
+                  </button>
                 </p>
-                <p className="text-black dark:text-white">Enter the code to verify your account.</p>
+                {!canResend && (
+                  <p className="text-black/70 dark:text-white/70 text-sm">
+                    Resend code in {String(Math.floor(countdown / 60)).padStart(2, "0")}:
+                    {String(countdown % 60).padStart(2, "0")}
+                  </p>
+                )}
               </div>
             </div>
 
-            {/* Form Section */}
-            <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between mt-6">
-              <div className="space-y-6">
-                {/* OTP Input */}
-                <div className="flex justify-center gap-4">
-                  {otp.map((digit, index) => (
-                      <input
-                          key={index}
-                          ref={inputRefs[index]}
-                          type="text"
-                          pattern="[0-9]*"
-                          inputMode="numeric"
-                          maxLength={1}
-                          value={digit}
-                          onChange={(e) => handleOtpChange(index, e.target.value.replace(/[^0-9]/g, ""))}
-                          onKeyDown={(e) => handleKeyDown(index, e)}
-                          className="w-12 h-12 text-center text-lg bg-white/10 dark:bg-white/5 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-black dark:text-white"
-                      />
-                  ))}
-                </div>
-
-                {error && <p className="text-red-500 text-xs text-center">{error}</p>}
-
-                {/* Resend Code */}
-                <div className="text-center space-y-2">
-                  <p className="text-black dark:text-white text-sm">
-                    Didn't Receive Code?{" "}
-                    <button
-                        type="button"
-                        onClick={handleResendCode}
-                        className={`text-[#4285f4] ${!canResend && "opacity-50 cursor-not-allowed"}`}
-                        disabled={!canResend}
-                    >
-                      Resend Code
-                    </button>
-                  </p>
-                  {!canResend && (
-                      <p className="text-black/70 dark:text-white/70 text-sm">
-                        Resend code in {String(Math.floor(countdown / 60)).padStart(2, "0")}:
-                        {String(countdown % 60).padStart(2, "0")}
-                      </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <div className="flex justify-center mb-8">
-                <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white dark:text-black hover:bg-white/20 dark:hover:bg-black/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                >
-                  {isLoading ? (
-                      <Loader2 className="w-4 h-4 animate-spin opacity-70" />
-                  ) : (
-                      <ArrowRight className="w-4 h-4 text-black dark:text-white opacity-70" />
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
+            {/* Submit Button */}
+            <div className="flex justify-center mb-8">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white dark:text-black hover:bg-white/20 dark:hover:bg-black/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin opacity-70" />
+                ) : (
+                  <ArrowRight className="w-4 h-4 text-black dark:text-white opacity-70" />
+                )}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
+    </div>
   )
 }
 

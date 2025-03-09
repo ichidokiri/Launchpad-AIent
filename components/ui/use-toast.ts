@@ -1,4 +1,11 @@
-import { toast as useToast } from "react-hot-toast"
+import toast from "react-hot-toast"
 
-export const toast = useToast
+export { toast }
+
+// For compatibility with any code expecting useToast
+export const useToast = () => {
+  return {
+    toast,
+  }
+}
 

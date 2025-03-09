@@ -12,21 +12,40 @@ import {
   Users,
   Bot,
   AlertTriangle,
+  Activity,
+  RefreshCw,
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/app/context/AuthContext"
-import { toast } from "@/components/ui/use-toast"
+import toast from "react-hot-toast"
 import { LoadingSpinner } from "@/components/loading-spinner"
-import type { AgentWithCreator } from "@/types/agent"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
-// Use the imported type instead of defining it here
+// Type definition here to avoid conflicts
+interface Agent {
+  id: string
+  name: string
+  symbol: string
+  logo?: string
+  price: string | number
+  marketCap: number | string
+  createdAt: string
+  creator?: {
+    id: string
+    name?: string
+    email: string
+  }
+}
 
 export default function DashboardPage() {
-  const [agents, setAgents] = useState<AgentWithCreator[]>([])
+  const [agents, setAgents] = useState<Agent[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [dbStatus, setDbStatus] = useState<any>(null)
+  const [isCheckingDb, setIsCheckingDb] = useState(false)
   const { user } = useAuth()
 
   // Navigation items for the sidebar - show admin items only for admin users
@@ -34,47 +53,70 @@ export default function DashboardPage() {
     { icon: Home, label: "Overview", href: "/dashboard" },
     { icon: Settings, label: "Settings", href: "/dashboard/settings" },
     ...(user?.role === "admin"
-        ? [
+      ? [
           { icon: Bot, label: "All AI Agents", href: "/dashboard/all-agents" },
           { icon: Users, label: "All Users", href: "/dashboard/all-users" },
           { icon: AlertTriangle, label: "Reset Database", href: "/dashboard/admin/reset" },
+          { icon: Activity, label: "Diagnostics", href: "/dashboard/diagnostics" },
         ]
-        : []),
+      : []),
     { icon: HelpCircle, label: "Help", href: "/dashboard/help" },
   ]
 
   const fetchAgents = useCallback(async () => {
     try {
       setIsLoading(true)
-      const response = await fetch("/api/agents")
+      console.log("Fetching agents for user:", user?.email, "with ID:", user?.id)
+
+      if (!user?.id) {
+        console.error("No user ID available for fetching agents")
+        setAgents([])
+        setIsLoading(false)
+        return
+      }
+
+      // Use a direct API call to fetch agents
+      const response = await fetch(`/api/ai-agents?creatorId=${encodeURIComponent(user.id)}&t=${Date.now()}`, {
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      })
 
       if (!response.ok) {
         throw new Error(`Error ${response.status}: Failed to fetch agents`)
       }
 
       const data = await response.json()
-      if (!data.agents) {
-        throw new Error("No agents data received")
-      }
+      console.log("Fetched agents data:", data)
 
-      // Filter agents to only show those created by the current user
-      const userAgents = data.agents.filter((agent: AgentWithCreator) => agent.creator?.email === user?.email)
-      setAgents(userAgents)
+      if (data.agents && Array.isArray(data.agents)) {
+        setAgents(data.agents)
+      } else {
+        console.error("Unexpected response format:", data)
+        setAgents([])
+      }
     } catch (error) {
       console.error("Error fetching agents:", error)
       toast.error("Failed to load your agents")
+      setAgents([])
     } finally {
       setIsLoading(false)
     }
-  }, [user?.email])
+  }, [user?.id])
 
+  // Add this logging to help debug agent fetching
   useEffect(() => {
     if (user) {
+      console.log("User data available, fetching agents")
       fetchAgents()
+    } else {
+      console.log("No user data available yet")
     }
-  }, [fetchAgents, user])
+  }, [user, fetchAgents])
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     try {
       const response = await fetch(`/api/agents/${id}`, {
         method: "DELETE",
@@ -95,165 +137,306 @@ export default function DashboardPage() {
     }
   }
 
-  const formatNumber = (num: number, prefix = "") => {
-    if (num >= 1000000) {
-      return `${prefix}${(num / 1000000).toFixed(2)}M`
+  const formatNumber = (num: number | string | undefined, prefix = "") => {
+    if (num === undefined || num === null) return `${prefix}0`
+
+    const numValue = typeof num === "string" ? Number.parseFloat(num) : num
+
+    if (isNaN(numValue)) return `${prefix}0`
+
+    if (numValue >= 1000000) {
+      return `${prefix}${(numValue / 1000000).toFixed(2)}M`
     }
-    if (num >= 1000) {
-      return `${prefix}${(num / 1000).toFixed(2)}K`
+    if (numValue >= 1000) {
+      return `${prefix}${(numValue / 1000).toFixed(2)}K`
     }
-    return `${prefix}${num.toFixed(2)}`
+    return `${prefix}${numValue.toFixed(2)}`
+  }
+
+  const checkDatabaseConnection = async () => {
+    try {
+      setIsCheckingDb(true)
+      const response = await fetch("/api/debug-db/connection")
+      const data = await response.json()
+
+      setDbStatus(data)
+
+      if (data.status === "connected") {
+        toast.success("Database connection successful!")
+      } else {
+        toast.error("Database connection failed")
+      }
+    } catch (error) {
+      console.error("Error checking database:", error)
+      toast.error("Failed to check database connection")
+    } finally {
+      setIsCheckingDb(false)
+    }
   }
 
   if (isLoading) {
     return (
-        <div className="flex min-h-[calc(100vh-3.5rem)]">
-          <aside className="w-64 border-r bg-background">
-            <div className="flex h-full flex-col">
-              <div className="space-y-4 py-4">
-                <div className="px-3 py-2">
-                  <h2 className="mb-2 px-4 text-lg font-semibold">Dashboard</h2>
-                  <nav className="space-y-1">
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-                        >
-                          <item.icon className="mr-2 h-4 w-4" />
-                          {item.label}
-                        </Link>
-                    ))}
-                  </nav>
-                </div>
-              </div>
-            </div>
-          </aside>
-          <div className="flex flex-1 items-center justify-center">
-            <LoadingSpinner />
-          </div>
-        </div>
-    )
-  }
-
-  return (
-      <div className="flex min-h-[calc(100vh-3.5rem)]">
-        {/* Sidebar */}
-        <aside className="w-64 border-r bg-background">
+      <div className="flex min-h-[calc(100vh-3.5rem)] bg-black">
+        <aside className="w-64 border-r border-gray-700 bg-black">
           <div className="flex h-full flex-col">
             <div className="space-y-4 py-4">
               <div className="px-3 py-2">
-                <h2 className="mb-2 px-4 text-lg font-semibold">Dashboard</h2>
+                <h2 className="mb-2 px-4 text-lg font-semibold text-white">Dashboard</h2>
                 <nav className="space-y-1">
                   {navItems.map((item) => (
-                      <Link
-                          key={item.href}
-                          href={item.href}
-                          className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-                      >
-                        <item.icon className="mr-2 h-4 w-4" />
-                        {item.label}
-                      </Link>
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white"
+                    >
+                      <item.icon className="mr-2 h-4 w-4" />
+                      {item.label}
+                    </Link>
                   ))}
                 </nav>
               </div>
             </div>
           </div>
         </aside>
+        <div className="flex flex-1 items-center justify-center">
+          <LoadingSpinner />
+        </div>
+      </div>
+    )
+  }
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="container mx-auto max-w-5xl px-6 py-8">
-            <div className="mb-8 flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-semibold">Your AI Agents</h1>
-                <p className="text-muted-foreground">Manage and monitor your AI agents</p>
-              </div>
-              <Link href="/create">
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Agent
-                </Button>
-              </Link>
-            </div>
-
-            {/* Agents Grid */}
-            <div className="grid gap-6">
-              {agents.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-8">
-                    You haven't created any AI agents yet. Click "Create Agent" to get started!
-                  </div>
-              ) : (
-                  agents.map((agent) => (
-                      <div
-                          key={agent.id}
-                          className="rounded-lg border bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
-                      >
-                        <div className="flex items-center justify-between">
-                          <Link href={`/market/${agent.id}`} className="flex items-center space-x-4">
-                            <Image
-                                src={agent.logo || "/placeholder.svg?height=40&width=40"}
-                                alt={agent.name}
-                                width={40}
-                                height={40}
-                                className="rounded-full"
-                                unoptimized={agent.logo?.startsWith("data:")}
-                            />
-                            <div>
-                              <h3 className="font-medium">{agent.name}</h3>
-                              <p className="text-sm text-muted-foreground">{agent.symbol}</p>
-                            </div>
-                          </Link>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleDelete(agent.id)} className="text-red-600">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-
-                        <div className="mt-4 grid grid-cols-3 gap-4">
-                          <div className="space-y-1">
-                            <p className="text-sm text-muted-foreground">Price</p>
-                            <p className="font-medium">${agent.price}</p>
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-sm text-muted-foreground">Created</p>
-                            <p className="font-medium">{new Date(agent.createdAt).toLocaleDateString()}</p>
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-sm text-muted-foreground">Market Cap</p>
-                            <p className="font-medium">{formatNumber(agent.marketCap, "$")}</p>
-                          </div>
-                        </div>
-
-                        <div className="mt-4 flex items-center justify-between">
-                          <div className="flex items-center">
-                            <span className="mr-2 h-2 w-2 rounded-full bg-green-500" />
-                            <span className="text-sm capitalize text-muted-foreground">active</span>
-                          </div>
-                          <Link
-                              href={`/market/${agent.id}`}
-                              className="flex items-center text-sm text-muted-foreground hover:text-primary"
-                          >
-                            View Details
-                            <ChevronRight className="ml-1 h-4 w-4" />
-                          </Link>
-                        </div>
-                      </div>
-                  ))
-              )}
+  return (
+    <div className="flex min-h-[calc(100vh-3.5rem)] bg-black">
+      {/* Sidebar */}
+      <aside className="w-64 border-r border-gray-700 bg-black">
+        <div className="flex h-full flex-col">
+          <div className="space-y-4 py-4">
+            <div className="px-3 py-2">
+              <h2 className="mb-2 px-4 text-lg font-semibold text-white">Dashboard</h2>
+              <nav className="space-y-1">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white"
+                  >
+                    <item.icon className="mr-2 h-4 w-4" />
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
             </div>
           </div>
-        </main>
-      </div>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto bg-black">
+        <div className="container mx-auto max-w-5xl px-6 py-8">
+          <Tabs defaultValue="agents">
+            <TabsList className="mb-6 bg-[#2F2F2F]">
+              <TabsTrigger value="agents" className="data-[state=active]:bg-gray-700">
+                Your AI Agents
+              </TabsTrigger>
+              {user?.role === "admin" && (
+                <TabsTrigger value="debug" className="data-[state=active]:bg-gray-700">
+                  Debug Tools
+                </TabsTrigger>
+              )}
+            </TabsList>
+
+            <TabsContent value="agents">
+              <div className="mb-8 flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-semibold text-white">Your AI Agents</h1>
+                  <p className="text-gray-300">Manage and monitor your AI agents</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={fetchAgents} className="bg-[#2F2F2F] hover:bg-gray-600 text-white">
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Refresh
+                  </Button>
+                  <Link href="/create">
+                    <Button className="bg-[#2F2F2F] hover:bg-gray-600 text-white">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Agent
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Agents Grid */}
+              <div className="grid gap-6">
+                {!agents || agents.length === 0 ? (
+                  <div className="text-center text-gray-300 py-8">
+                    You haven't created any AI agents yet. Click "Create Agent" to get started!
+                  </div>
+                ) : (
+                  agents.map((agent) => (
+                    <div
+                      key={agent.id}
+                      className="rounded-lg border border-gray-700 bg-[#2F2F2F] p-6 shadow-sm transition-shadow hover:shadow-md"
+                    >
+                      <div className="flex items-center justify-between">
+                        <Link href={`/market/${agent.id}`} className="flex items-center space-x-4">
+                          <Image
+                            src={agent.logo || "/placeholder.svg?height=40&width=40"}
+                            alt={agent.name}
+                            width={40}
+                            height={40}
+                            className="rounded-full"
+                            unoptimized={agent.logo?.startsWith("data:")}
+                          />
+                          <div>
+                            <h3 className="font-medium text-white">{agent.name}</h3>
+                            <p className="text-sm text-gray-300">{agent.symbol}</p>
+                          </div>
+                        </Link>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-gray-300 hover:text-white hover:bg-gray-700"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-[#1f1f1f] border-gray-700">
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(agent.id)}
+                              className="text-red-500 focus:bg-gray-700 focus:text-red-500"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+
+                      <div className="mt-4 grid grid-cols-3 gap-4">
+                        <div className="space-y-1">
+                          <p className="text-sm text-gray-300">Price</p>
+                          <p className="font-medium text-white">
+                            ${typeof agent.price === "number" ? agent.price.toFixed(2) : agent.price || "0.00"}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm text-gray-300">Created</p>
+                          <p className="font-medium text-white">
+                            {agent.createdAt ? new Date(agent.createdAt).toLocaleDateString() : "N/A"}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm text-gray-300">Market Cap</p>
+                          <p className="font-medium text-white">{formatNumber(agent.marketCap, "$")}</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex items-center justify-between">
+                        <div className="flex items-center">
+                          <span className="mr-2 h-2 w-2 rounded-full bg-green-500" />
+                          <span className="text-sm capitalize text-gray-300">active</span>
+                        </div>
+                        <Link
+                          href={`/market/${agent.id}`}
+                          className="flex items-center text-sm text-gray-300 hover:text-white"
+                        >
+                          View Details
+                          <ChevronRight className="ml-1 h-4 w-4" />
+                        </Link>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </TabsContent>
+
+            {user?.role === "admin" && (
+              <TabsContent value="debug">
+                <div className="mb-6">
+                  <h1 className="text-2xl font-semibold text-white mb-2">Debug Tools</h1>
+                  <p className="text-gray-300">Troubleshoot database and system issues</p>
+                </div>
+
+                <div className="grid gap-6">
+                  <Card className="bg-[#2F2F2F] border-gray-700 text-white">
+                    <CardHeader>
+                      <CardTitle className="text-white">Database Connection</CardTitle>
+                      <CardDescription className="text-gray-300">
+                        Check if the database is connected properly
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button
+                        onClick={checkDatabaseConnection}
+                        disabled={isCheckingDb}
+                        className="bg-gray-700 hover:bg-gray-600 text-white"
+                      >
+                        {isCheckingDb ? (
+                          <>
+                            <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                            Checking...
+                          </>
+                        ) : (
+                          <>
+                            <Activity className="mr-2 h-4 w-4" />
+                            Check Database Connection
+                          </>
+                        )}
+                      </Button>
+
+                      {dbStatus && (
+                        <div className="mt-4">
+                          <h3 className="font-medium mb-2 text-white">Database Status</h3>
+                          <div className="bg-[#1f1f1f] p-4 rounded-md overflow-auto max-h-[300px] text-gray-300 border border-gray-700">
+                            <pre>{JSON.stringify(dbStatus, null, 2)}</pre>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card className="bg-[#2F2F2F] border-gray-700 text-white">
+                      <CardHeader>
+                        <CardTitle className="text-white">Diagnostics Page</CardTitle>
+                        <CardDescription className="text-gray-300">Advanced system diagnostics</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <Button
+                          onClick={() => (window.location.href = "/dashboard/diagnostics")}
+                          className="bg-gray-700 hover:bg-gray-600 text-white"
+                        >
+                          <Activity className="mr-2 h-4 w-4" />
+                          Go to Diagnostics
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-[#2F2F2F] border-gray-700 text-white">
+                      <CardHeader>
+                        <CardTitle className="text-white">Debug Tools</CardTitle>
+                        <CardDescription className="text-gray-300">Additional debugging tools</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <Button
+                          onClick={() => (window.location.href = "/debug")}
+                          className="bg-gray-700 hover:bg-gray-600 text-white"
+                        >
+                          <AlertTriangle className="mr-2 h-4 w-4" />
+                          Open Debug Tools
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </TabsContent>
+            )}
+          </Tabs>
+        </div>
+      </main>
+    </div>
   )
 }
 

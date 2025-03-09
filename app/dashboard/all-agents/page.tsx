@@ -1,200 +1,162 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Trash2 } from "lucide-react"
-import Image from "next/image"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { toast } from "@/components/ui/use-toast"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useRouter } from "next/navigation"
+import { PlusCircle, RefreshCw } from "lucide-react"
 import { useAuth } from "@/app/context/AuthContext"
 
-interface AIAgent {
+// Define the Agent interface to properly type our data
+interface Agent {
   id: string
   name: string
-  symbol: string
-  logo: string
-  price: number
-  holders: number
-  marketCap: number
-  status: "active" | "pending" | "paused"
-  ownerId: string
-}
-
-const mockAgents: AIAgent[] = [
-  {
-    id: "1",
-    name: "Trading Assistant Pro",
-    symbol: "$TAP",
-    logo: "/placeholder.svg?height=40&width=40",
-    price: 0.15,
-    holders: 266647,
-    marketCap: 40210000,
-    status: "active",
-    ownerId: "user123",
-  },
-  {
-    id: "2",
-    name: "Market Analysis Bot",
-    symbol: "$MAB",
-    logo: "/placeholder.svg?height=40&width=40",
-    price: 0.08,
-    holders: 152200,
-    marketCap: 17760000,
-    status: "active",
-    ownerId: "user123",
-  },
-  {
-    id: "3",
-    name: "Portfolio Manager AI",
-    symbol: "$PMA",
-    logo: "/placeholder.svg?height=40&width=40",
-    price: 0.12,
-    holders: 89500,
-    marketCap: 25430000,
-    status: "pending",
-    ownerId: "user456",
-  },
-]
-
-const formatNumber = (num: number, prefix = "") => {
-  if (num >= 1000000) {
-    return `${prefix}${(num / 1000000).toFixed(2)}M`
-  }
-  if (num >= 1000) {
-    return `${prefix}${(num / 1000).toFixed(2)}K`
-  }
-  return `${prefix}${num.toFixed(2)}`
+  description: string
+  category: string
+  createdAt: string
+  updatedAt: string
+  creatorId: string
+  // Add other properties as needed
 }
 
 export default function AllAgentsPage() {
-  const [agents, setAgents] = useState<AIAgent[]>([])
-  const { user } = useAuth()
+  const [agents, setAgents] = useState<Agent[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const { user } = useAuth()
+
+  // Modify the fetchAgents function to properly filter by the current user
+
+  const fetchAgents = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+
+      // Get the current user's ID
+      if (!user?.id) {
+        console.error("No user ID available for fetching agents")
+        setError("User authentication required")
+        setAgents([])
+        setIsLoading(false)
+        return
+      }
+
+      console.log("Fetching agents for user ID:", user.id)
+
+      // Add a cache-busting query parameter and filter by creator ID
+      const response = await fetch(`/api/dashboard/user-agents?userId=${encodeURIComponent(user.id)}&t=${Date.now()}`, {
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch agents: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      console.log("Fetched agents response:", data)
+
+      if (data.agents && Array.isArray(data.agents)) {
+        setAgents(data.agents)
+        if (data.agents.length === 0) {
+          console.log("No agents found in response")
+        }
+      } else {
+        console.error("Invalid response format:", data)
+        setAgents([])
+        setError("Invalid response format from server")
+      }
+    } catch (error) {
+      console.error("Error fetching agents:", error)
+      setError(error instanceof Error ? error.message : "Failed to fetch agents")
+      setAgents([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   useEffect(() => {
-    // Check if user is admin
-    if (user?.role !== "admin") {
-      router.push("/dashboard")
-      return
-    }
-
-    // In the future, replace this with an actual API call
-    setAgents(mockAgents)
-  }, [user, router])
-
-  const handleDelete = async (id: string) => {
-    try {
-      // Simulated API call
-      // await fetch(`/api/agents/${id}`, { method: 'DELETE' });
-
-      // Update local state
-      setAgents(agents.filter((agent) => agent.id !== id))
-      toast({
-        title: "Agent Deleted",
-        description: "The AI agent has been successfully deleted.",
-      })
-    } catch (error) {
-      console.error("Error deleting agent:", error)
-      toast({
-        title: "Error",
-        description: "Failed to delete the AI agent. Please try again.",
-        variant: "destructive",
-      })
-    }
-  }
-
-  if (user?.role !== "admin") {
-    return null
-  }
+    fetchAgents()
+  }, [user?.id])
 
   return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">All AI Agents</h1>
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg">
-            <thead className="bg-gray-50 dark:bg-gray-700">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                Agent
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                Symbol
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                Price
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                Holders
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                Market Cap
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            {agents.map((agent) => (
-                <tr key={agent.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10">
-                        <Image
-                            className="h-10 w-10 rounded-full"
-                            src={agent.logo || "/placeholder.svg"}
-                            alt=""
-                            width={40}
-                            height={40}
-                            unoptimized={agent.logo?.startsWith("data:")}
-                        />
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">{agent.name}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">Owner ID: {agent.ownerId}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white">{agent.symbol}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white">${agent.price}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white">{formatNumber(agent.holders)}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white">{formatNumber(agent.marketCap, "$")}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          agent.status === "active"
-                              ? "bg-green-100 text-green-800"
-                              : agent.status === "pending"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-red-100 text-red-800"
-                      }`}
-                  >
-                    {agent.status}
-                  </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                    <Button onClick={() => handleDelete(agent.id)} variant="destructive" size="sm">
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </Button>
-                  </td>
-                </tr>
-            ))}
-            </tbody>
-          </table>
+    <div className="container mx-auto py-10">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">All AI Agents</h1>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={fetchAgents} disabled={isLoading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+          <Button onClick={() => router.push("/dashboard/create-agent")}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Create New Agent
+          </Button>
         </div>
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+          <h3 className="text-red-800 font-medium mb-2">Error</h3>
+          <p className="text-red-700">{error}</p>
+        </div>
+      )}
+
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Card key={index}>
+              <CardHeader>
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-20 w-full mb-4" />
+                <div className="flex justify-between">
+                  <Skeleton className="h-10 w-20" />
+                  <Skeleton className="h-10 w-20" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : agents.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {agents.map((agent) => (
+            <Card key={agent.id} className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <CardTitle>{agent.name}</CardTitle>
+                <CardDescription>
+                  {agent.category} • {new Date(agent.createdAt).toLocaleDateString()}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500 mb-4 line-clamp-3">{agent.description}</p>
+                <div className="flex justify-between">
+                  <Button variant="outline" size="sm" onClick={() => router.push(`/dashboard/edit-agent/${agent.id}`)}>
+                    Edit
+                  </Button>
+                  <Button variant="default" size="sm" onClick={() => router.push(`/agent/${agent.id}`)}>
+                    View
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-10">
+          <h3 className="text-xl font-medium mb-2">No AI Agents Found</h3>
+          <p className="text-gray-500 mb-6">You haven't created any AI agents yet.</p>
+          <Button onClick={() => router.push("/dashboard/create-agent")}>Create Your First Agent</Button>
+        </div>
+      )}
+    </div>
   )
 }
 

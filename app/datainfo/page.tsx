@@ -6,8 +6,16 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import ReactMarkdown from "react-markdown"
 
+// Define a type for the article objects
+interface Article {
+  id: number
+  title: string
+  content: string
+  topic: string
+}
+
 // Mock data for articles
-const mockArticles = [
+const mockArticles: Article[] = [
   {
     id: 1,
     title: "Understanding Market Patterns",
@@ -28,11 +36,17 @@ const mockArticles = [
   },
 ]
 
+/**
+ * DataInfo page component
+ * Displays articles and information about trading and market analysis
+ */
 export default function DataInfoPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedTopic, setSelectedTopic] = useState("")
-  const [selectedArticle, setSelectedArticle] = useState(null)
+  // Properly type the selectedArticle state variable as Article | null
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
 
+  // Filter articles based on search term and selected topic
   const filteredArticles = mockArticles.filter(
     (article) =>
       article.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -42,7 +56,7 @@ export default function DataInfoPage() {
   const topics = ["analysis", "trading", "data analysis"]
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 bg-black text-white">
       <h1 className="text-3xl font-bold mb-6">DataInfo</h1>
       <div className="mb-6 flex space-x-4">
         <Input
@@ -50,9 +64,13 @@ export default function DataInfoPage() {
           placeholder="Search articles..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
+          className="max-w-sm bg-[#2F2F2F] border-gray-700 text-white placeholder:text-gray-400"
         />
-        <select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} className="border rounded p-2">
+        <select
+          value={selectedTopic}
+          onChange={(e) => setSelectedTopic(e.target.value)}
+          className="border rounded p-2 bg-[#2F2F2F] border-gray-700 text-white"
+        >
           <option value="">All Topics</option>
           {topics.map((topic) => (
             <option key={topic} value={topic}>
@@ -63,28 +81,32 @@ export default function DataInfoPage() {
       </div>
       {selectedArticle ? (
         <div>
-          <Button onClick={() => setSelectedArticle(null)} className="mb-4">
+          <Button onClick={() => setSelectedArticle(null)} className="mb-4 bg-[#2F2F2F] hover:bg-gray-600 text-white">
             Back to Articles
           </Button>
-          <Card>
+          <Card className="bg-[#2F2F2F] border-gray-700 text-white">
             <CardHeader>
               <CardTitle>{selectedArticle.title}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ReactMarkdown>{selectedArticle.content}</ReactMarkdown>
+              <ReactMarkdown className="text-white">{selectedArticle.content}</ReactMarkdown>
             </CardContent>
           </Card>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredArticles.map((article) => (
-            <Card key={article.id} className="cursor-pointer" onClick={() => setSelectedArticle(article)}>
+            <Card
+              key={article.id}
+              className="cursor-pointer bg-[#2F2F2F] border-gray-700 hover:bg-gray-700 transition-colors"
+              onClick={() => setSelectedArticle(article)}
+            >
               <CardHeader>
-                <CardTitle>{article.title}</CardTitle>
+                <CardTitle className="text-white">{article.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-500">Topic: {article.topic}</p>
-                <p className="mt-2">{article.content.substring(0, 100)}...</p>
+                <p className="text-sm text-gray-400">Topic: {article.topic}</p>
+                <p className="mt-2 text-gray-300">{article.content.substring(0, 100)}...</p>
               </CardContent>
             </Card>
           ))}

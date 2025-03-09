@@ -1,38 +1,116 @@
+/**
+ * Prisma seed script to initialize the database with default data
+ */
 import { PrismaClient } from "@prisma/client"
-import bcrypt from "bcryptjs"
+import * as bcrypt from "bcrypt"
 
+// Initialize Prisma client
 const prisma = new PrismaClient()
 
+/**
+ * Main seed function
+ */
 async function main() {
-    // Create super admin password hash
-    const superAdminPassword = await bcrypt.hash("sp,.adm!!PW??2025", 12)
+  // Check if super admin password is defined
+  const superAdminPasswordEnv = process.env.SUPER_ADMIN_PASSWORD
+  if (!superAdminPasswordEnv) {
+    throw new Error("SUPER_ADMIN_PASSWORD environment variable is not defined")
+  }
 
-    // Create or update super admin account
-    const superAdmin = await prisma.user.upsert({
-        where: { email: "adominn@outlook.com" },
-        update: {},
-        create: {
-            email: "adominn@outlook.com",
-            password: superAdminPassword,
-            role: "ADMIN",
-            monadBalance: 1000000, // Initial balance for super admin
-        },
+  // Create super admin password hash using env variable
+  const superAdminPassword = await bcrypt.hash(superAdminPasswordEnv, 12)
+
+  // Create or update super admin account
+  const superAdmin = await prisma.user.upsert({
+    where: { email: process.env.ADMIN_EMAIL || "admin@tradegpt.com" },
+    update: {
+      password: superAdminPassword,
+      role: "SUPERADMIN",
+    },
+    create: {
+      email: process.env.ADMIN_EMAIL || "admin@tradegpt.com",
+      password: superAdminPassword,
+      name: "Super Admin",
+      role: "SUPERADMIN",
+    },
+  })
+
+  console.log(`Super admin account created/updated: ${superAdmin.email}`)
+
+  // Create default AI agents
+  const defaultAgents = [
+    {
+      name: "TradeGPT Basic",
+      description: "Basic trading assistant with market analysis capabilities",
+      price: 0, // Free tier
+      features: ["Market analysis", "Basic trading signals", "Educational content"],
+      isPublic: true,
+      creatorId: superAdmin.id, // Add the creator ID reference
+    },
+    {
+      name: "TradeGPT Pro",
+      description: "Advanced trading assistant with real-time signals and portfolio management",
+      price: 9900, // $99.00
+      features: [
+        "Real-time trading signals",
+        "Portfolio optimization",
+        "Risk management",
+        "Advanced market analysis",
+        "Trading strategy backtesting",
+      ],
+      isPublic: true,
+      creatorId: superAdmin.id, // Add the creator ID reference
+    },
+    {
+      name: "TradeGPT Enterprise",
+      description: "Enterprise-grade trading solution with custom integrations",
+      price: 29900, // $299.00
+      features: [
+        "Custom API integrations",
+        "Institutional-grade analysis",
+        "Multi-asset portfolio management",
+        "Custom reporting",
+        "Dedicated support",
+      ],
+      isPublic: true,
+      creatorId: superAdmin.id, // Add the creator ID reference
+    },
+  ]
+
+  // Upsert default agents
+  for (const agent of defaultAgents) {
+    // First check if the agent already exists by name
+    const existingAgent = await prisma.aIAgent.findFirst({
+      where: { name: agent.name },
     })
 
-    console.log("Super Admin account created:", {
-        id: superAdmin.id,
-        email: superAdmin.email,
-        role: superAdmin.role,
-    })
+    if (existingAgent) {
+      // Update existing agent
+      const updatedAgent = await prisma.aIAgent.update({
+        where: { id: existingAgent.id },
+        data: agent,
+      })
+      console.log(`AI Agent updated: ${updatedAgent.name}`)
+    } else {
+      // Create new agent
+      const createdAgent = await prisma.aIAgent.create({
+        data: agent,
+      })
+      console.log(`AI Agent created: ${createdAgent.name}`)
+    }
+  }
+
+  console.log("Database seeding completed successfully")
 }
 
+// Execute the seed function
 main()
-    .then(async () => {
-        await prisma.$disconnect()
-    })
-    .catch(async (e) => {
-        console.error("Error seeding database:", e)
-        await prisma.$disconnect()
-        process.exit(1)
-    })
+  .catch((e) => {
+    console.error("Error during database seeding:", e)
+    process.exit(1)
+  })
+  .finally(async () => {
+    // Close Prisma client connection
+    await prisma.$disconnect()
+  })
 

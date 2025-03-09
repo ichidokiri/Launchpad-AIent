@@ -35,11 +35,11 @@ export default function LivestreamPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 bg-black text-white">
       <h1 className="text-3xl font-bold mb-6">Livestream</h1>
       <div className="w-full max-w-5xl mx-auto">
         <div
-          className="relative w-full"
+          className="relative w-full bg-[#2F2F2F] rounded-lg overflow-hidden"
           style={{ paddingTop: "56.25%" }} // 16:9 aspect ratio
         >
           <iframe
@@ -57,9 +57,11 @@ export default function LivestreamPage() {
             placeholder="Enter Twitch or YouTube URL"
             value={inputUrl}
             onChange={(e) => setInputUrl(e.target.value)}
-            className="flex-grow"
+            className="flex-grow bg-[#2F2F2F] border-gray-700 text-white placeholder:text-gray-400"
           />
-          <Button onClick={handleStreamChange}>Enter</Button>
+          <Button onClick={handleStreamChange} className="bg-[#2F2F2F] hover:bg-gray-600 text-white">
+            Enter
+          </Button>
         </div>
       </div>
     </div>

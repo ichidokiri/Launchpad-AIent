@@ -1,17 +1,5 @@
-// Prisma Schema
-//
-// This schema defines the database structure and relationships for the application.
-// It uses PostgreSQL as the database provider and includes models for:
-// - Users
-// - AI Agents
-// - Tokens
-// - Interactions
-//
-// The schema implements:
-// - Proper foreign key relationships
-// - Cascading deletes where appropriate
-// - Indexes for performance
-// - Field constraints and validation
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -23,88 +11,86 @@ datasource db {
 }
 
 model User {
-  id           Int           @id @default(autoincrement())
-  email        String        @unique
-  password     String
-  role         String        @default("USER")
-  monadBalance Int           @default(0)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  agents       Agent[]
-  Token        Token[]
-  Interaction  Interaction[]
-
-  @@index([email])
+  id              String            @id @default(cuid())
+  name            String?
+  email           String            @unique
+  username        String?           @unique
+  password        String
+  role            String            @default("USER") // USER, ADMIN, SUPERADMIN
+  status          String?           @default("active") // active, inactive, pending
+  monadBalance    Float?            @default(0)
+  image           String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  agents          AIAgent[]
+  verificationCodes VerificationCode[]
+  tokens          Token[]
+  interactions    Interaction[]
 }
 
-// AI Agent Model
-// Represents AI agents that can be traded and interacted with
-model Agent {
-  id          Int           @id @default(autoincrement())
-  name        String
-  symbol      String        @unique
-  description String?
-  price       Float
-  marketCap   Float
-  logo        String? // Add this field
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  creator     User          @relation(fields: [creatorId], references: [id])
-  creatorId   Int
-  Token       Token[]
-  Interaction Interaction[]
-
-  @@index([creatorId])
-  @@index([symbol])
+model AIAgent {
+  id              String            @id @default(cuid())
+  name            String
+  description     String?
+  model           String            @default("gpt-3.5-turbo")
+  systemPrompt    String?           @db.Text
+  category        String            @default("Other")
+  isPublic        Boolean           @default(false)
+  price           Float             @default(0)
+  creatorId       String
+  creator         User              @relation(fields: [creatorId], references: [id])
+  logo            String?
+  contractAddress String?
+  symbol          String
+  marketCap       Float             @default(0)
+  totalSupply     Float?
+  holders         Int?
+  verified        Boolean?          @default(false)
+  status          String?           @default("active") // active, pending, paused
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  purchases       Purchase[]
+  interactions    Interaction[]
 }
 
-// Token Model
-// Represents ownership tokens for AI agents
-model Token {
-  id        Int      @id @default(autoincrement())
-  amount    Int // Number of tokens owned
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relationships
-  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId  Int
-  agent   Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
-  agentId Int
-
-  @@unique([userId, agentId]) // Prevent duplicate token entries
-  @@index([userId])
-  @@index([agentId])
-}
-
-// Interaction Model
-// Records interactions between users and AI agents
-model Interaction {
-  id        Int      @id @default(autoincrement())
-  prompt    String   @db.Text // User input
-  response  String   @db.Text // AI response
-  createdAt DateTime @default(now())
-
-  // Relationships
-  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId  Int
-  agent   Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
-  agentId Int
-
-  @@index([userId])
-  @@index([agentId])
-  @@index([createdAt]) // Index for chronological queries
-}
-
-// Add this model to your schema
 model VerificationCode {
-  id        Int      @id @default(autoincrement())
-  email     String
-  code      String
-  expiresAt DateTime
-  used      Boolean  @default(false)
-  createdAt DateTime @default(now())
-
-  @@index([email, code])
-  @@index([email, expiresAt])
+  id              String            @id @default(cuid())
+  email           String
+  code            String
+  expiresAt       DateTime
+  used            Boolean           @default(false)
+  createdAt       DateTime          @default(now())
+  user            User?             @relation(fields: [email], references: [email])
 }
+
+model Token {
+  id              String            @id @default(cuid())
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token           String            @unique
+  type            String            // refresh, access, etc.
+  expiresAt       DateTime
+  createdAt       DateTime          @default(now())
+}
+
+model Purchase {
+  id              String            @id @default(cuid())
+  agentId         String
+  agent           AIAgent           @relation(fields: [agentId], references: [id])
+  userId          String
+  amount          Float
+  createdAt       DateTime          @default(now())
+}
+
+model Interaction {
+  id              String            @id @default(cuid())
+  userId          String
+  user            User              @relation(fields: [userId], references: [id])
+  agentId         String
+  agent           AIAgent           @relation(fields: [agentId], references: [id])
+  type            String            // chat, feedback, etc.
+  content         String?           @db.Text
+  rating          Int?
+  createdAt       DateTime          @default(now())
+}
+
