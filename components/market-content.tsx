@@ -114,36 +114,33 @@ export default function MarketContent() {
   return (
     <div className="w-full px-6 py-6 bg-black">
       <div className="mx-auto max-w-[1400px]">
-        <div className="rounded-lg border bg-card">
+        <div className="rounded-lg border-2 border-gray-700 bg-[#121212]">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b">
-                  <th className="w-[30%] px-6 py-4 text-left text-sm font-medium text-muted-foreground">
-                    <button onClick={() => handleSort("name")} className="inline-flex items-center hover:text-primary">
+                <tr className="border-b-2 border-gray-700">
+                  <th className="w-[30%] px-6 py-4 text-left text-sm font-medium text-gray-300">
+                    <button onClick={() => handleSort("name")} className="inline-flex items-center hover:text-white">
                       AI Agents
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </button>
                   </th>
-                  <th className="w-[15%] px-6 py-4 text-left text-sm font-medium text-muted-foreground">
-                    <button
-                      onClick={() => handleSort("symbol")}
-                      className="inline-flex items-center hover:text-primary"
-                    >
+                  <th className="w-[15%] px-6 py-4 text-left text-sm font-medium text-gray-300">
+                    <button onClick={() => handleSort("symbol")} className="inline-flex items-center hover:text-white">
                       Symbol
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </button>
                   </th>
-                  <th className="w-[15%] px-6 py-4 text-right text-sm font-medium text-muted-foreground">
-                    <button onClick={() => handleSort("price")} className="inline-flex items-center hover:text-primary">
+                  <th className="w-[15%] px-6 py-4 text-right text-sm font-medium text-gray-300">
+                    <button onClick={() => handleSort("price")} className="inline-flex items-center hover:text-white">
                       Price
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </button>
                   </th>
-                  <th className="w-[20%] px-6 py-4 text-right text-sm font-medium text-muted-foreground">
+                  <th className="w-[20%] px-6 py-4 text-right text-sm font-medium text-gray-300">
                     <button
                       onClick={() => handleSort("marketCap")}
-                      className="inline-flex items-center hover:text-primary"
+                      className="inline-flex items-center hover:text-white"
                     >
                       Market Cap
                       <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -153,7 +150,7 @@ export default function MarketContent() {
               </thead>
               <tbody>
                 {sortedAgents.map((agent) => (
-                  <tr key={agent.id} className="border-b last:border-0 hover:bg-muted/50">
+                  <tr key={agent.id} className="border-b-2 border-gray-700 last:border-0 hover:bg-[#1a1a1a]">
                     <td className="px-6 py-4">
                       <Link href={`/market/${agent.id}`} className="flex items-center gap-3">
                         <Image
@@ -166,20 +163,22 @@ export default function MarketContent() {
                         />
                         <div>
                           <div className="flex items-center gap-1">
-                            <span className="font-medium">{agent.name}</span>
+                            <span className="font-medium text-white">{agent.name}</span>
                             {agent.verified && <CheckCircle2 className="h-4 w-4 text-blue-500" />}
                           </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span className="text-xs opacity-50">{truncateAddress(agent.contractAddress)}</span>
+                          <div className="flex items-center gap-2 text-sm text-gray-400">
+                            <span className="text-xs opacity-70">{truncateAddress(agent.contractAddress)}</span>
                           </div>
                         </div>
                       </Link>
                     </td>
-                    <td className="px-6 py-4 font-medium">{agent.symbol}</td>
-                    <td className="px-6 py-4 text-right font-medium">
+                    <td className="px-6 py-4 font-medium text-white">{agent.symbol}</td>
+                    <td className="px-6 py-4 text-right font-medium text-white">
                       ${typeof agent.price === "number" ? agent.price.toFixed(3) : Number(agent.price).toFixed(3)}
                     </td>
-                    <td className="px-6 py-4 text-right font-medium">{formatNumber(agent.marketCap, "$")}</td>
+                    <td className="px-6 py-4 text-right font-medium text-white">
+                      {formatNumber(agent.marketCap, "$")}
+                    </td>
                   </tr>
                 ))}
               </tbody>

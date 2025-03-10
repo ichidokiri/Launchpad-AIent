@@ -15,7 +15,7 @@ export function StickyNav() {
   const [walletAddress, setWalletAddress] = useState("")
 
   const navItems = [
-    { name: "Market", href: "/market" },
+    { name: "Market", href: "/" },
     { name: "Create", href: "/create" },
     { name: "Dashboard", href: "/dashboard" },
     { name: "TradeGPT", href: "/tradegpt" },

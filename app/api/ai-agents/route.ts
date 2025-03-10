@@ -71,11 +71,11 @@ export async function POST(request: NextRequest) {
       price: typeof body.price === "number" ? body.price : Number.parseFloat(body.price) || 0,
       symbol: body.symbol.toUpperCase(),
       marketCap:
-          typeof body.marketCap === "number"
-              ? body.marketCap
-              : typeof body.tokenAmount === "number"
-                  ? body.price * body.tokenAmount
-                  : 0,
+        typeof body.marketCap === "number"
+          ? body.marketCap
+          : typeof body.tokenAmount === "number"
+            ? body.price * body.tokenAmount
+            : 0,
       creatorId: userId,
       logo: body.avatar || null,
     }
@@ -106,12 +106,12 @@ export async function POST(request: NextRequest) {
 
     // Provide detailed error information
     return NextResponse.json(
-        {
-          error: "Failed to create agent",
-          message: error instanceof Error ? error.message : String(error),
-          stack: process.env.NODE_ENV === "development" ? (error instanceof Error ? error.stack : undefined) : undefined,
-        },
-        { status: 500 },
+      {
+        error: "Failed to create agent",
+        message: error instanceof Error ? error.message : String(error),
+        stack: process.env.NODE_ENV === "development" ? (error instanceof Error ? error.stack : undefined) : undefined,
+      },
+      { status: 500 },
     )
   }
 }
@@ -156,11 +156,11 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Error fetching agents:", error)
     return NextResponse.json(
-        {
-          error: "Failed to fetch agents",
-          message: error instanceof Error ? error.message : String(error),
-        },
-        { status: 500 },
+      {
+        error: "Failed to fetch agents",
+        message: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 },
     )
   }
 }

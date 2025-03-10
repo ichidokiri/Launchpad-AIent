@@ -9,13 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { AgentChart } from "@/components/agent-chart"
 import { SwapInterface } from "@/components/swap-interface"
 import { LoadingSpinner } from "@/components/loading-spinner"
-import { toast } from "react-hot-toast" // Changed to react-hot-toast
+import { toast } from "react-hot-toast"
 import type { Agent } from "@/types/agent"
 
 export default function AgentDetailsPage() {
-  // Make sure the agent state is properly typed
-  const [agent, setAgent] = useState<Agent | null>(null)
   const params = useParams()
+  const [agent, setAgent] = useState<Agent | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -42,7 +41,7 @@ export default function AgentDetailsPage() {
         console.error("Error fetching agent details:", error)
         const errorMessage = error instanceof Error ? error.message : "Failed to fetch agent details"
         setError(errorMessage)
-        toast.error(errorMessage) // Using react-hot-toast's error method
+        toast.error(errorMessage)
       } finally {
         setIsLoading(false)
       }
@@ -134,7 +133,7 @@ export default function AgentDetailsPage() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger className="text-sm hover:text-primary">
-                    {agent.creatorId || "Unknown Creator"}
+                    {agent.creator?.email || "Unknown Creator"}
                   </TooltipTrigger>
                   <TooltipContent>View creator profile</TooltipContent>
                 </Tooltip>
@@ -215,7 +214,17 @@ export default function AgentDetailsPage() {
                     <CardTitle className="text-sm font-medium">Holders</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{agent.holders ? formatNumber(agent.holders) : "N/A"}</div>
+                    <div className="flex items-center gap-2">
+                      <Image
+                        className="h-10 w-10 rounded-full"
+                        src={agent.logo || "/placeholder.svg?height=40&width=40"}
+                        alt=""
+                        width={40}
+                        height={40}
+                        unoptimized={agent.logo?.startsWith("data:")}
+                      />
+                      <div className="text-2xl font-bold">{agent.holders ? formatNumber(agent.holders) : "N/A"}</div>
+                    </div>
                   </CardContent>
                 </Card>
               </div>

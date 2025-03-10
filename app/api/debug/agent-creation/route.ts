@@ -76,7 +76,6 @@ export async function POST(request: Request) {
         model: "gpt-3.5-turbo",
         category: "test",
         isPublic: true,
-        logo: body.avatar || null,
       },
     })
 

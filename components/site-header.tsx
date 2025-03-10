@@ -27,7 +27,7 @@ export function SiteHeader() {
   ]
 
   // Public navigation items
-  const publicNavItems = [{ href: "/market", label: "Market" }]
+  const publicNavItems = [{ href: "/", label: "Market" }]
 
   const handleConnectWallet = async () => {
     if (!user) {

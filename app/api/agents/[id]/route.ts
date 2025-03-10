@@ -69,18 +69,18 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Await params before accessing
-    const { id: paramId } = await params
-    const id = Number.parseInt(paramId)
+    // Get the ID from params
+    const { id } = params
 
-    if (isNaN(id)) {
+    if (!id) {
       return NextResponse.json({ error: "Invalid agent ID" }, { status: 400 })
     }
 
+    console.log("Deleting agent with ID:", id)
+
     // Find the agent first to check ownership
-    // Using prisma.aIAgent (camelCase)
     const agent = await prisma.aIAgent.findUnique({
-      where: { id: id.toString() }, // Convert to string
+      where: { id },
       include: {
         creator: {
           select: {
@@ -101,9 +101,8 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     }
 
     // Delete the agent
-    // Using prisma.aIAgent (camelCase)
     await prisma.aIAgent.delete({
-      where: { id: id.toString() }, // Convert to string
+      where: { id },
     })
 
     return NextResponse.json({ success: true, message: "Agent deleted successfully" })
