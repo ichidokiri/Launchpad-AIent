@@ -29,10 +29,10 @@ export async function signToken(payload: TokenPayload): Promise<string> {
     }
 
     const token = await new SignJWT({ ...payload })
-      .setProtectedHeader({ alg: "HS256" })
-      .setIssuedAt()
-      .setExpirationTime(`${TOKEN_EXPIRATION}s`)
-      .sign(new TextEncoder().encode(jwtSecret))
+        .setProtectedHeader({ alg: "HS256" })
+        .setIssuedAt()
+        .setExpirationTime(`${TOKEN_EXPIRATION}s`)
+        .sign(new TextEncoder().encode(jwtSecret))
 
     return token
   } catch (error) {

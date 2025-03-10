@@ -10,22 +10,25 @@ declare global {
 }
 
 // Create a singleton instance of PrismaClient
-let prisma: PrismaClient
+let prismaInstance: PrismaClient
 
 // In production, create a new instance
 // In development, reuse the global instance to prevent multiple connections
 if (process.env.NODE_ENV === "production") {
-  prisma = new PrismaClient()
+  prismaInstance = new PrismaClient({
+    log: ["query", "error", "warn"], // Enable logging in production too for debugging
+  })
 } else {
   if (!global.prisma) {
     global.prisma = new PrismaClient({
       log: ["query", "error", "warn"], // Enable logging in development
     })
   }
-  prisma = global.prisma
+  prismaInstance = global.prisma
 }
 
-export { prisma }
+// Export the prisma instance that is guaranteed to be defined
+export const prisma = prismaInstance
 
 /**
  * Safely disconnects from the database
@@ -52,6 +55,21 @@ export async function withDb<T>(operation: () => Promise<T>): Promise<T> {
     throw error
   } finally {
     // No need to disconnect here as we're using a singleton
+  }
+}
+
+/**
+ * Checks if the database is connected
+ * @returns True if connected, false otherwise
+ */
+export async function checkDbConnection(): Promise<boolean> {
+  try {
+    // Execute a simple query to check connection
+    await prisma.$queryRaw`SELECT 1`
+    return true
+  } catch (error) {
+    console.error("Database connection check failed:", error)
+    return false
   }
 }
 

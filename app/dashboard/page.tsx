@@ -68,33 +68,89 @@ export default function DashboardPage() {
       setIsLoading(true)
       console.log("Fetching agents for user:", user?.email, "with ID:", user?.id)
 
-      if (!user?.id) {
-        console.error("No user ID available for fetching agents")
-        setAgents([])
-        setIsLoading(false)
-        return
+      // Try multiple endpoints to find agents
+      let response
+      let data
+      let foundAgents = false
+
+      // First try the dashboard user-agents endpoint
+      try {
+        response = await fetch(`/api/dashboard/user-agents?t=${Date.now()}`, {
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+            Expires: "0",
+          },
+        })
+
+        if (response.ok) {
+          data = await response.json()
+          console.log("Response from user-agents:", data)
+
+          if (data.agents && Array.isArray(data.agents) && data.agents.length > 0) {
+            setAgents(data.agents)
+            foundAgents = true
+            console.log("Found agents from user-agents endpoint:", data.agents.length)
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching from user-agents:", error)
       }
 
-      // Use a direct API call to fetch agents
-      const response = await fetch(`/api/ai-agents?creatorId=${encodeURIComponent(user.id)}&t=${Date.now()}`, {
-        headers: {
-          "Cache-Control": "no-cache, no-store, must-revalidate",
-          Pragma: "no-cache",
-          Expires: "0",
-        },
-      })
+      // If no agents found, try the ai-agents endpoint
+      if (!foundAgents) {
+        try {
+          response = await fetch(`/api/ai-agents?t=${Date.now()}`, {
+            headers: {
+              "Cache-Control": "no-cache, no-store, must-revalidate",
+              Pragma: "no-cache",
+              Expires: "0",
+            },
+          })
 
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: Failed to fetch agents`)
+          if (response.ok) {
+            data = await response.json()
+            console.log("Response from ai-agents:", data)
+
+            if (data.agents && Array.isArray(data.agents)) {
+              setAgents(data.agents)
+              foundAgents = true
+              console.log("Found agents from ai-agents endpoint:", data.agents.length)
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching from ai-agents:", error)
+        }
       }
 
-      const data = await response.json()
-      console.log("Fetched agents data:", data)
+      // If still no agents found, try the agents endpoint
+      if (!foundAgents) {
+        try {
+          response = await fetch(`/api/agents?t=${Date.now()}`, {
+            headers: {
+              "Cache-Control": "no-cache, no-store, must-revalidate",
+              Pragma: "no-cache",
+              Expires: "0",
+            },
+          })
 
-      if (data.agents && Array.isArray(data.agents)) {
-        setAgents(data.agents)
-      } else {
-        console.error("Unexpected response format:", data)
+          if (response.ok) {
+            data = await response.json()
+            console.log("Response from agents:", data)
+
+            if (data.agents && Array.isArray(data.agents)) {
+              setAgents(data.agents)
+              foundAgents = true
+              console.log("Found agents from agents endpoint:", data.agents.length)
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching from agents:", error)
+        }
+      }
+
+      if (!foundAgents) {
+        console.log("No agents found from any endpoint")
         setAgents([])
       }
     } catch (error) {
@@ -104,9 +160,9 @@ export default function DashboardPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [user?.id])
+  }, [user?.id, user?.email])
 
-  // Add this logging to help debug agent fetching
+  // Log user data and fetch agents when available
   useEffect(() => {
     if (user) {
       console.log("User data available, fetching agents")
@@ -177,7 +233,7 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
         <div className="flex min-h-[calc(100vh-3.5rem)] bg-black">
-          <aside className="w-64 border-r border-gray-700 bg-black">
+          <aside className="w-64 border-r-2 border-white bg-black">
             <div className="flex h-full flex-col">
               <div className="space-y-4 py-4">
                 <div className="px-3 py-2">
@@ -187,7 +243,7 @@ export default function DashboardPage() {
                         <Link
                             key={item.href}
                             href={item.href}
-                            className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white"
+                            className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-white hover:bg-gray-800 hover:text-white border-2 border-white"
                         >
                           <item.icon className="mr-2 h-4 w-4" />
                           {item.label}
@@ -208,7 +264,7 @@ export default function DashboardPage() {
   return (
       <div className="flex min-h-[calc(100vh-3.5rem)] bg-black">
         {/* Sidebar */}
-        <aside className="w-64 border-r border-gray-700 bg-black">
+        <aside className="w-64 border-r-2 border-white bg-black">
           <div className="flex h-full flex-col">
             <div className="space-y-4 py-4">
               <div className="px-3 py-2">
@@ -218,7 +274,7 @@ export default function DashboardPage() {
                       <Link
                           key={item.href}
                           href={item.href}
-                          className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white"
+                          className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-white hover:bg-gray-800 hover:text-white border-2 border-white"
                       >
                         <item.icon className="mr-2 h-4 w-4" />
                         {item.label}
@@ -234,19 +290,20 @@ export default function DashboardPage() {
         <main className="flex-1 overflow-y-auto bg-black">
           <div className="container mx-auto max-w-5xl px-6 py-8">
             <Tabs defaultValue="agents">
-              <TabsList className="mb-6 bg-[#2F2F2F]">
-                <TabsTrigger value="agents" className="data-[state=active]:bg-gray-700">
+              <TabsList className="mb-6 bg-[#2F2F2F] border-2 border-white">
+                <TabsTrigger value="agents" className="data-[state=active]:bg-black">
                   Your AI Agents
                 </TabsTrigger>
                 {user?.role === "admin" && (
-                    <TabsTrigger value="debug" className="data-[state=active]:bg-gray-700">
+                    <TabsTrigger value="debug" className="data-[state=active]:bg-black">
                       Debug Tools
                     </TabsTrigger>
                 )}
               </TabsList>
 
               <TabsContent value="agents">
-                <div className="mb-8 flex items-center justify-between">
+                {/* Header Container with pure black background, padding, bold border */}
+                <div className="mb-8 bg-black p-4 rounded-md flex items-center justify-between border-2 border-white">
                   <div>
                     <h1 className="text-2xl font-semibold text-white">Your AI Agents</h1>
                     <p className="text-gray-400">Manage and monitor your AI agents</p>
@@ -255,13 +312,13 @@ export default function DashboardPage() {
                     <Button
                         variant="outline"
                         onClick={fetchAgents}
-                        className="bg-[#1f1f1f] border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+                        className="bg-[#1f1f1f] border-2 border-white text-gray-300 hover:bg-gray-800 hover:text-white"
                     >
                       <RefreshCw className="mr-2 h-4 w-4" />
                       Refresh
                     </Button>
                     <Link href="/create">
-                      <Button className="bg-[#1f1f1f] border border-gray-700 hover:bg-gray-800 text-gray-300 hover:text-white">
+                      <Button className="bg-[#1f1f1f] border-2 border-white hover:bg-gray-800 text-gray-300 hover:text-white">
                         <Plus className="mr-2 h-4 w-4" />
                         Create Agent
                       </Button>
@@ -272,31 +329,13 @@ export default function DashboardPage() {
                 {/* Agents Grid */}
                 <div className="grid gap-6">
                   {!agents || agents.length === 0 ? (
-                      <div className="relative p-8 rounded-xl border border-gray-800 bg-[#1a1a1a] overflow-hidden">
-                        {/* Background pattern */}
-                        <div className="absolute inset-0 opacity-5">
-                          <div
-                              className="absolute inset-0"
-                              style={{
-                                backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)",
-                                backgroundSize: "20px 20px",
-                              }}
-                          ></div>
-                        </div>
-
-                        {/* Content container */}
+                      // Removed the blue gradient overlay elements
+                      <div className="relative overflow-hidden rounded-xl border-2 border-white bg-[#1a1a1a] p-8">
                         <div className="relative z-10 flex flex-col items-center justify-center text-center">
-                          {/* Icon with layered effect */}
+                          {/* Icon Container without blue overlay */}
                           <div className="relative mb-6">
-                            <div className="absolute -inset-1 rounded-full bg-blue-500/20 blur-sm"></div>
-                            <div className="absolute -inset-3 rounded-full bg-blue-500/10 blur-md"></div>
-                            <div className="relative bg-[#2a2a2a] p-4 rounded-full border border-gray-700 shadow-lg">
-                              <svg
-                                  className="h-12 w-12 text-blue-400"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                              >
+                            <div className="relative rounded-full border-2 border-white bg-[#2a2a2a] p-4 shadow-lg">
+                              <svg className="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
@@ -307,19 +346,16 @@ export default function DashboardPage() {
                             </div>
                           </div>
 
-                          {/* Text content with layered cards */}
+                          {/* Text Content */}
                           <div className="relative">
-                            <div className="absolute -inset-x-8 -inset-y-6 bg-[#232323] rounded-xl -z-10 transform -rotate-1"></div>
-                            <div className="absolute -inset-x-8 -inset-y-6 bg-[#1f1f1f] rounded-xl -z-20 transform rotate-1"></div>
-
-                            <div className="bg-[#262626] p-6 rounded-lg border border-gray-700 shadow-md">
-                              <h3 className="text-gray-200 text-xl font-semibold mb-2">No AI Agents Found</h3>
-                              <p className="text-gray-400 mb-6">
-                                You haven't created any AI agents yet. Create your first agent to get started!
+                            <div className="rounded-lg border-2 border-white bg-[#262626] p-6 shadow-md">
+                              <h3 className="mb-2 text-xl font-semibold text-gray-200">No AI Agents Found</h3>
+                              <p className="mb-6 text-gray-400">
+                                You haven&apos;t created any AI agents yet. Create your first agent to get started!
                               </p>
 
                               <Link href="/create">
-                                <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-none shadow-lg shadow-blue-900/20">
+                                <Button className="border-2 border-white bg-[#2F2F2F] text-white hover:bg-gray-800 shadow-lg">
                                   <Plus className="mr-2 h-4 w-4" />
                                   Create Agent
                                 </Button>
@@ -332,7 +368,7 @@ export default function DashboardPage() {
                       agents.map((agent) => (
                           <div
                               key={agent.id}
-                              className="rounded-lg border border-gray-800 bg-[#1f1f1f] p-6 shadow-sm transition-shadow hover:shadow-md"
+                              className="rounded-lg border-2 border-white bg-[#1f1f1f] p-6 shadow-sm transition-shadow hover:shadow-md"
                           >
                             <div className="flex items-center justify-between">
                               <Link href={`/market/${agent.id}`} className="flex items-center space-x-4">
@@ -354,12 +390,12 @@ export default function DashboardPage() {
                                   <Button
                                       variant="ghost"
                                       size="icon"
-                                      className="text-gray-300 hover:text-white hover:bg-gray-700"
+                                      className="text-gray-300 hover:bg-gray-700 hover:text-white border-2 border-white"
                                   >
                                     <MoreHorizontal className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="bg-[#1f1f1f] border-gray-700">
+                                <DropdownMenuContent align="end" className="border-2 border-white bg-[#1f1f1f]">
                                   <DropdownMenuItem
                                       onClick={() => handleDelete(agent.id)}
                                       className="text-red-500 focus:bg-gray-700 focus:text-red-500"
@@ -412,12 +448,12 @@ export default function DashboardPage() {
               {user?.role === "admin" && (
                   <TabsContent value="debug">
                     <div className="mb-6">
-                      <h1 className="text-2xl font-semibold text-white mb-2">Debug Tools</h1>
+                      <h1 className="mb-2 text-2xl font-semibold text-white">Debug Tools</h1>
                       <p className="text-gray-300">Troubleshoot database and system issues</p>
                     </div>
 
                     <div className="grid gap-6">
-                      <Card className="bg-[#2F2F2F] border-gray-700 text-white">
+                      <Card className="border-2 border-white bg-[#2F2F2F] text-white">
                         <CardHeader>
                           <CardTitle className="text-white">Database Connection</CardTitle>
                           <CardDescription className="text-gray-300">
@@ -428,7 +464,7 @@ export default function DashboardPage() {
                           <Button
                               onClick={checkDatabaseConnection}
                               disabled={isCheckingDb}
-                              className="bg-gray-700 hover:bg-gray-600 text-white"
+                              className="bg-gray-700 text-white hover:bg-gray-600 border-2 border-white"
                           >
                             {isCheckingDb ? (
                                 <>
@@ -445,8 +481,8 @@ export default function DashboardPage() {
 
                           {dbStatus && (
                               <div className="mt-4">
-                                <h3 className="font-medium mb-2 text-white">Database Status</h3>
-                                <div className="bg-[#1f1f1f] p-4 rounded-md overflow-auto max-h-[300px] text-gray-300 border border-gray-700">
+                                <h3 className="mb-2 font-medium text-white">Database Status</h3>
+                                <div className="max-h-[300px] overflow-auto rounded-md border-2 border-white bg-[#1f1f1f] p-4 text-gray-300">
                                   <pre>{JSON.stringify(dbStatus, null, 2)}</pre>
                                 </div>
                               </div>
@@ -454,8 +490,8 @@ export default function DashboardPage() {
                         </CardContent>
                       </Card>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card className="bg-[#2F2F2F] border-gray-700 text-white">
+                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <Card className="border-2 border-white bg-[#2F2F2F] text-white">
                           <CardHeader>
                             <CardTitle className="text-white">Diagnostics Page</CardTitle>
                             <CardDescription className="text-gray-300">Advanced system diagnostics</CardDescription>
@@ -463,7 +499,7 @@ export default function DashboardPage() {
                           <CardContent>
                             <Button
                                 onClick={() => (window.location.href = "/dashboard/diagnostics")}
-                                className="bg-gray-700 hover:bg-gray-600 text-white"
+                                className="bg-gray-700 text-white hover:bg-gray-600 border-2 border-white"
                             >
                               <Activity className="mr-2 h-4 w-4" />
                               Go to Diagnostics
@@ -471,7 +507,7 @@ export default function DashboardPage() {
                           </CardContent>
                         </Card>
 
-                        <Card className="bg-[#2F2F2F] border-gray-700 text-white">
+                        <Card className="border-2 border-white bg-[#2F2F2F] text-white">
                           <CardHeader>
                             <CardTitle className="text-white">Debug Tools</CardTitle>
                             <CardDescription className="text-gray-300">Additional debugging tools</CardDescription>
@@ -479,7 +515,7 @@ export default function DashboardPage() {
                           <CardContent>
                             <Button
                                 onClick={() => (window.location.href = "/debug")}
-                                className="bg-gray-700 hover:bg-gray-600 text-white"
+                                className="bg-gray-700 text-white hover:bg-gray-600 border-2 border-white"
                             >
                               <AlertTriangle className="mr-2 h-4 w-4" />
                               Open Debug Tools

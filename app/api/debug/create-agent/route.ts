@@ -1,82 +1,103 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
-import { auth } from "@/lib/auth"
-
 export const dynamic = "force-dynamic"
 
-const prisma = new PrismaClient({
-  log: ["query", "info", "warn", "error"],
-})
+import { NextResponse } from "next/server"
+import { prisma } from "@/lib/db"
 
-export async function POST(request: NextRequest) {
-  console.log("POST /api/debug/create-agent - Received request")
-
+export async function GET() {
   try {
-    // Authenticate user
-    const user = await auth(request)
-    console.log("Authenticated user:", user ? { id: user.id, email: user.email, role: user.role } : "No user")
+    // Check database connection
+    await prisma.$queryRaw`SELECT 1`
 
-    if (!user) {
-      console.error("POST /api/debug/create-agent - Authentication failed")
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    // Find the user in the database
-    console.log("Looking up user in database with email:", user.email)
-    const dbUser = await prisma.user.findUnique({
-      where: { email: user.email },
+    // Get recent agent creation attempts
+    const recentAgents = await prisma.aIAgent.findMany({
+      take: 10,
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            email: true,
+          },
+        },
+      },
     })
 
-    if (!dbUser) {
-      console.error("POST /api/debug/create-agent - User not found in database:", user.email)
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
-    }
-
-    console.log("Found user in database:", { id: dbUser.id, email: dbUser.email })
-
-    // Parse request body
-    let data
-    try {
-      const rawData = await request.text()
-      console.log("Raw request body:", rawData)
-      data = JSON.parse(rawData)
-      console.log("POST /api/debug/create-agent - Parsed request data:", data)
-    } catch (parseError) {
-      console.error("POST /api/debug/create-agent - Failed to parse request body:", parseError)
-      return NextResponse.json(
-        {
-          error: "Invalid request body",
-          details: parseError instanceof Error ? parseError.message : "JSON parse error",
-        },
-        { status: 400 },
-      )
-    }
-
-    // Return diagnostic information without creating an agent
     return NextResponse.json({
       success: true,
-      message: "Debug information for agent creation",
-      user: {
-        id: dbUser.id,
-        email: dbUser.email,
-        role: dbUser.role,
-      },
-      requestData: data,
-      databaseConnection: "OK",
+      message: "Database connection successful",
+      recentAgents,
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error("Error in debug endpoint:", error)
+    console.error("Debug endpoint error:", error)
     return NextResponse.json(
-      {
-        error: "Debug endpoint error",
-        message: error instanceof Error ? error.message : "Unknown error",
-        stack: process.env.NODE_ENV === "development" ? (error instanceof Error ? error.stack : undefined) : undefined,
-      },
-      { status: 500 },
+        {
+          success: false,
+          error: "Database connection failed",
+          message: error instanceof Error ? error.message : String(error),
+          timestamp: new Date().toISOString(),
+        },
+        { status: 500 },
     )
-  } finally {
-    await prisma.$disconnect()
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json()
+
+    console.log("Debug agent creation request:", body)
+
+    // Find a user to use as creator
+    const user = await prisma.user.findFirst()
+
+    if (!user) {
+      return NextResponse.json(
+          {
+            success: false,
+            error: "No users found in database",
+            message: "Please create a user first",
+          },
+          { status: 400 },
+      )
+    }
+
+    // Create a test agent
+    const testAgent = await prisma.aIAgent.create({
+      data: {
+        name: body.name || "Test Agent",
+        description: body.description || "Created by debug endpoint",
+        symbol: body.symbol || "TEST",
+        price: typeof body.price === "number" ? body.price : 0.01,
+        marketCap: typeof body.marketCap === "number" ? body.marketCap : 100,
+        creatorId: user.id,
+        model: "gpt-3.5-turbo",
+        category: "test",
+        isPublic: true,
+      },
+    })
+
+    return NextResponse.json({
+      success: true,
+      message: "Test agent created successfully",
+      agent: testAgent,
+      user: {
+        id: user.id,
+        email: user.email,
+      },
+    })
+  } catch (error) {
+    console.error("Debug agent creation error:", error)
+    return NextResponse.json(
+        {
+          success: false,
+          error: "Failed to create test agent",
+          message: error instanceof Error ? error.message : String(error),
+        },
+        { status: 500 },
+    )
   }
 }
 

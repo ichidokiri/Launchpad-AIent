@@ -65,7 +65,7 @@ async function verifyToken(request?: Request | NextRequest): Promise<TokenPayloa
 
     // If no token in header, try both cookie names
     if (!token) {
-      const cookieStore = cookies()
+      const cookieStore = await cookies()
       token = cookieStore.get("authToken")?.value || cookieStore.get("token")?.value
     }
 

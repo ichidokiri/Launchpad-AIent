@@ -368,9 +368,9 @@ export default function TradeGPTPage() {
                             {message.role === "user" ? "U" : "AI"}
                           </div>
                           <div className="flex-1 space-y-2">
-                            <ReactMarkdown className="prose dark:prose-invert prose-p:leading-relaxed prose-pre:p-0">
-                              {message.content}
-                            </ReactMarkdown>
+                            <div className="prose dark:prose-invert prose-p:leading-relaxed prose-pre:p-0">
+                              <ReactMarkdown>{message.content}</ReactMarkdown>
+                            </div>
                             {message.role === "assistant" && (
                                 <div className="flex items-center gap-2 mt-2">
                                   <Button
