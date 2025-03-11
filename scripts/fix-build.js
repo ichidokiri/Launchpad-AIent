@@ -29,27 +29,38 @@ pathsToClear.forEach((dirPath) => {
 
 // Update next.config.js to disable certain features that might be causing issues
 try {
-  console.log("Updating next.config.js to fix build issues...")
+  let configPath = "next.config.js"
+  let configExists = fs.existsSync(configPath)
 
-  const nextConfigPath = path.join(process.cwd(), "next.config.js")
-  let nextConfig = fs.readFileSync(nextConfigPath, "utf8")
+  if (!configExists) {
+    configPath = "next.config.mjs"
+    configExists = fs.existsSync(configPath)
+  }
 
-  // Disable experimental features that might be causing issues
-  nextConfig = nextConfig.replace(
-    /experimental:\s*{[^}]*}/,
-    `experimental: {
-    serverComponentsExternalPackages: ["@prisma/client", "bcryptjs"],
-    outputFileTracingRoot: undefined,
-    // Disable features that might be causing build issues
-    optimizeCss: false,
-    swcMinify: true
-  }`,
-  )
+  if (configExists) {
+    console.log(`Updating ${configPath} to fix build issues...`)
+    const nextConfigPath = path.join(process.cwd(), configPath)
+    let nextConfig = fs.readFileSync(nextConfigPath, "utf8")
 
-  fs.writeFileSync(nextConfigPath, nextConfig)
-  console.log("✅ Updated next.config.js")
+    // Disable experimental features that might be causing issues
+    nextConfig = nextConfig.replace(
+        /experimental:\s*{[^}]*}/,
+        `experimental: {
+      serverComponentsExternalPackages: ["@prisma/client", "bcryptjs"],
+      outputFileTracingRoot: undefined,
+      // Disable features that might be causing build issues
+      optimizeCss: false,
+      swcMinify: true
+    }`,
+    )
+
+    fs.writeFileSync(nextConfigPath, nextConfig)
+    console.log("✅ Updated next.config.js")
+  } else {
+    console.log("❌ No next.config.js or next.config.mjs found")
+  }
 } catch (error) {
-  console.error("❌ Error updating next.config.js:", error)
+  console.error(`❌ Error updating next config: ${error}`)
 }
 
 // Run build with clean flag

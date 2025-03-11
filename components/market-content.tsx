@@ -152,7 +152,7 @@ export default function MarketContent() {
                 {sortedAgents.map((agent) => (
                   <tr key={agent.id} className="border-b-2 border-gray-700 last:border-0 hover:bg-[#1a1a1a]">
                     <td className="px-6 py-4">
-                      <Link href={`/market/${agent.id}`} className="flex items-center gap-3">
+                      <Link href={`/market/${agent.symbol}`} className="flex items-center gap-3">
                         <Image
                           src={agent.logo || `/placeholder.svg?height=32&width=32&text=${agent.name.charAt(0)}`}
                           alt={agent.name}

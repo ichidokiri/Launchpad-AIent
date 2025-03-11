@@ -2,32 +2,30 @@ export const dynamic = "force-dynamic"
 
 /**
  * API route for managing individual agents
- * This file handles retrieving, updating, and deleting agents by ID
- * Note: Prisma generates camelCase properties (aIAgent) from PascalCase models (AIAgent)
+ * This file handles retrieving, updating, and deleting agents by ID or symbol
  */
 import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 
 /**
- * Retrieves an agent by ID
+ * Retrieves an agent by ID or symbol
  * @param request - The request object
  * @param params - The route parameters
  * @returns The response with the agent
  */
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
-    // Await params before accessing
-    const { id: paramId } = await params
-    const id = Number.parseInt(paramId)
+    // Get the ID or symbol from params
+    const { id: idOrSymbol } = params
 
-    if (isNaN(id)) {
-      return NextResponse.json({ error: "Invalid agent ID" }, { status: 400 })
+    if (!idOrSymbol) {
+      return NextResponse.json({ error: "Invalid agent ID or symbol" }, { status: 400 })
     }
 
-    // Using prisma.aIAgent (camelCase) instead of prisma.AIAgent
-    const agent = await prisma.aIAgent.findUnique({
-      where: { id: id.toString() }, // Convert to string since your ID is a string in the schema
+    // Try to find the agent by ID first
+    let agent = await prisma.aIAgent.findUnique({
+      where: { id: idOrSymbol },
       include: {
         creator: {
           select: {
@@ -37,6 +35,26 @@ export async function GET(request: Request, { params }: { params: { id: string }
         },
       },
     })
+
+    // If not found by ID, try to find by symbol (case insensitive)
+    if (!agent) {
+      agent = await prisma.aIAgent.findFirst({
+        where: {
+          symbol: {
+            equals: idOrSymbol,
+            mode: "insensitive", // Case insensitive search
+          },
+        },
+        include: {
+          creator: {
+            select: {
+              id: true,
+              email: true,
+            },
+          },
+        },
+      })
+    }
 
     if (!agent) {
       return NextResponse.json({ error: "Agent not found" }, { status: 404 })
@@ -132,18 +150,16 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Await params before accessing
-    const { id: paramId } = await params
-    const id = Number.parseInt(paramId)
+    // Get the ID from params
+    const { id } = params
 
-    if (isNaN(id)) {
+    if (!id) {
       return NextResponse.json({ error: "Invalid agent ID" }, { status: 400 })
     }
 
     // Find the agent first to check ownership
-    // Using prisma.aIAgent (camelCase)
     const agent = await prisma.aIAgent.findUnique({
-      where: { id: id.toString() }, // Convert to string
+      where: { id },
       include: {
         creator: {
           select: {
@@ -167,9 +183,8 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     const data = await request.json()
 
     // Update the agent
-    // Using prisma.aIAgent (camelCase)
     const updatedAgent = await prisma.aIAgent.update({
-      where: { id: id.toString() }, // Convert to string
+      where: { id },
       data,
       include: {
         creator: {

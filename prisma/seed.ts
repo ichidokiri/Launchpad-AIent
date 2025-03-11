@@ -41,14 +41,16 @@ async function main() {
   const defaultAgents = [
     {
       name: "TradeGPT Basic",
+      symbol: "TGPT-B", // Add the symbol property
       description: "Basic trading assistant with market analysis capabilities",
       price: 0, // Free tier
       features: ["Market analysis", "Basic trading signals", "Educational content"],
       isPublic: true,
-      creatorId: superAdmin.id, // Add the creator ID reference
+      creatorId: superAdmin.id,
     },
     {
       name: "TradeGPT Pro",
+      symbol: "TGPT-P", // Add the symbol property
       description: "Advanced trading assistant with real-time signals and portfolio management",
       price: 9900, // $99.00
       features: [
@@ -59,10 +61,11 @@ async function main() {
         "Trading strategy backtesting",
       ],
       isPublic: true,
-      creatorId: superAdmin.id, // Add the creator ID reference
+      creatorId: superAdmin.id,
     },
     {
       name: "TradeGPT Enterprise",
+      symbol: "TGPT-E", // Add the symbol property
       description: "Enterprise-grade trading solution with custom integrations",
       price: 29900, // $299.00
       features: [
@@ -73,7 +76,7 @@ async function main() {
         "Dedicated support",
       ],
       isPublic: true,
-      creatorId: superAdmin.id, // Add the creator ID reference
+      creatorId: superAdmin.id,
     },
   ]
 
@@ -105,12 +108,12 @@ async function main() {
 
 // Execute the seed function
 main()
-  .catch((e) => {
-    console.error("Error during database seeding:", e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    // Close Prisma client connection
-    await prisma.$disconnect()
-  })
+    .catch((e) => {
+      console.error("Error during database seeding:", e)
+      process.exit(1)
+    })
+    .finally(async () => {
+      // Close Prisma client connection
+      await prisma.$disconnect()
+    })
 

@@ -1,4 +1,4 @@
-"\"use client"
+"use client"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -21,9 +21,9 @@ export function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <LoadingSpinner />
-      </div>
+        <div className="flex items-center justify-center h-screen">
+          <LoadingSpinner />
+        </div>
     )
   }
 
@@ -32,12 +32,10 @@ export function Dashboard() {
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6 text-white">Dashboard</h1>
-      <p className="text-gray-400">Welcome, {user.email}!</p>
-    </div>
+      <div className="container mx-auto py-10">
+        <h1 className="text-3xl font-bold mb-6 text-white">Dashboard</h1>
+        <p className="text-gray-400">Welcome, {user.email}!</p>
+      </div>
   )
 }
-\
-"
 

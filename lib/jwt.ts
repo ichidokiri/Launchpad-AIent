@@ -76,7 +76,8 @@ export async function verifyToken(token: string): Promise<TokenPayload | null> {
  * @returns Promise<TokenPayload | null> The current user or null if not authenticated
  */
 export async function getUserFromToken(): Promise<TokenPayload | null> {
-  const cookieStore = cookies()
+  // Use await with cookies() since it's now asynchronous in Next.js 14
+  const cookieStore = await cookies()
   const token = cookieStore.get("authToken")?.value
 
   if (!token) {

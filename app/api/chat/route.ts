@@ -1,60 +1,44 @@
+/**
+ * API route for general chat functionality
+ * This file handles generating streaming responses from the OpenAI API
+ */
+import { createOpenAIStream } from "@/lib/ai-stream"
+
 export const dynamic = "force-dynamic"
 
-import { NextResponse } from "next/server"
-import OpenAI from "openai"
-
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
-
+/**
+ * Handles POST requests to generate chat responses with streaming
+ * @param req - The request object
+ * @returns A streaming response with the generated text
+ */
 export async function POST(req: Request) {
-  try {
-    // Check if API key is configured
-    if (!process.env.OPENAI_API_KEY) {
-      console.error("Missing OpenAI API key")
-      return NextResponse.json({ error: "API configuration error" }, { status: 500 })
+    try {
+        // Parse the request body to get the messages
+        const { messages } = await req.json()
+
+        // Create system message for general chat
+        const systemMessage = {
+            role: "system",
+            content: `You are a friendly and knowledgeable assistant. 
+      Feel free to use Markdown formatting in your responses:
+      - Use **bold** for emphasis
+      - Use *italic* for subtle emphasis
+      - Use \`code\` for technical terms
+      - Use \`\`\`language\n code \`\`\` for code blocks
+      - Use bullet points and numbered lists when appropriate`,
+        }
+
+        // Create a streaming response
+        return await createOpenAIStream([systemMessage, ...messages])
+    } catch (error) {
+        console.error("Chat API error:", error)
+        return new Response(
+            JSON.stringify({
+                error: "An error occurred while generating the response",
+                details: error instanceof Error ? error.message : String(error),
+            }),
+            { status: 500 },
+        )
     }
-
-    const { messages } = await req.json()
-
-    if (!messages || !Array.isArray(messages)) {
-      return NextResponse.json({ error: "Messages are required and must be an array" }, { status: 400 })
-    }
-
-    // Format messages for OpenAI
-    const formattedMessages = messages.map((msg: any) => ({
-      role: msg.role,
-      content: msg.content,
-    }))
-
-    // Add system message
-    formattedMessages.unshift({
-      role: "system",
-      content:
-        "You are TradeGPT, an AI assistant specialized in trading, market analysis, and financial insights. Provide accurate, helpful, and concise information about financial markets, trading strategies, and investment advice. Always clarify that you're providing information, not financial advice.",
-    })
-
-    // Call OpenAI API
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: formattedMessages,
-      temperature: 0.7,
-      max_tokens: 1000,
-    })
-
-    // Extract the response
-    const assistantResponse = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response."
-
-    return NextResponse.json({ response: assistantResponse })
-  } catch (error) {
-    console.error("Error in chat API:", error)
-    // Provide more specific error messages based on the error type
-    if (error instanceof OpenAI.APIError) {
-      console.error("OpenAI API Error:", error.status, error.message)
-      return NextResponse.json({ error: "AI service error", message: error.message }, { status: error.status || 500 })
-    }
-    return NextResponse.json({ error: "Failed to process your request" }, { status: 500 })
-  }
 }
 

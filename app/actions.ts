@@ -46,7 +46,7 @@ export async function loginUser(email: string, password: string) {
     const authToken = await signToken(tokenPayload)
     if (authToken) {
       // Use await with cookies()
-      const cookieStore = cookies()
+      const cookieStore = await cookies()
       cookieStore.set("authToken", authToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -315,7 +315,7 @@ export async function resetPassword(email: string, password: string) {
  */
 export async function refreshAuthToken() {
   try {
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     const authToken = cookieStore.get("authToken")?.value
     if (!authToken) {
       return { success: false, message: "No auth token available" }
@@ -355,7 +355,7 @@ export async function refreshAuthToken() {
  */
 export async function logout() {
   try {
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     cookieStore.delete("authToken")
     return { success: true }
   } catch (error) {

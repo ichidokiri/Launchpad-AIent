@@ -383,7 +383,7 @@ export default function DashboardPage() {
                       className="rounded-lg border-2 border-white bg-[#1f1f1f] p-6 shadow-sm transition-shadow hover:shadow-md"
                     >
                       <div className="flex items-center justify-between">
-                        <Link href={`/market/${agent.id}`} className="flex items-center space-x-4">
+                        <Link href={`/market/${agent.symbol}`} className="flex items-center space-x-4">
                           <Image
                             src={agent.logo || "/placeholder.svg?height=40&width=40"}
                             alt={agent.name}
@@ -444,7 +444,7 @@ export default function DashboardPage() {
                           <span className="text-sm capitalize text-gray-300">active</span>
                         </div>
                         <Link
-                          href={`/market/${agent.id}`}
+                          href={`/market/${agent.symbol}`}
                           className="flex items-center text-sm text-gray-300 hover:text-white"
                         >
                           View Details

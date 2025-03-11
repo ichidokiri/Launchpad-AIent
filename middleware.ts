@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    // Get user from token
+    // Get user from token - properly await the async function
     const user = await getUserFromToken()
 
     // If no user is found and this is a protected route, redirect to login

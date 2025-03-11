@@ -73,8 +73,4 @@ export async function GET(request: Request) {
     )
   }
 }
-// If this file is importing from next-auth, we need to update it
-// For example, if there's a line like:
-// import { getServerSession } from "next-auth/next";
-// Remove it or comment it out
 

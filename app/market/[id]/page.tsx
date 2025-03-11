@@ -23,12 +23,15 @@ export default function AgentDetailsPage() {
     const fetchAgentDetails = async () => {
       try {
         setIsLoading(true)
-        const id = params?.id
-        if (!id) {
-          throw new Error("No agent ID provided")
+        const idOrSymbol = params?.id
+        if (!idOrSymbol) {
+          throw new Error("No agent ID or symbol provided")
         }
 
-        const response = await fetch(`/api/agents/${id}`)
+        // Log the request for debugging
+        console.log(`Fetching agent details for: ${idOrSymbol}`)
+
+        const response = await fetch(`/api/agents/${idOrSymbol}`)
 
         if (!response.ok) {
           const errorData = await response.json()
@@ -36,6 +39,8 @@ export default function AgentDetailsPage() {
         }
 
         const data = await response.json()
+        console.log("Received agent data:", data)
+
         setAgent(data.agent)
       } catch (error) {
         console.error("Error fetching agent details:", error)
