@@ -29,13 +29,8 @@ pathsToClear.forEach((dirPath) => {
 
 // Update next.config.js to disable certain features that might be causing issues
 try {
-  let configPath = "next.config.js"
-  let configExists = fs.existsSync(configPath)
-
-  if (!configExists) {
-    configPath = "next.config.mjs"
-    configExists = fs.existsSync(configPath)
-  }
+  const configPath = "next.config.js"
+  const configExists = fs.existsSync(configPath)
 
   if (configExists) {
     console.log(`Updating ${configPath} to fix build issues...`)
@@ -57,7 +52,7 @@ try {
     fs.writeFileSync(nextConfigPath, nextConfig)
     console.log("✅ Updated next.config.js")
   } else {
-    console.log("❌ No next.config.js or next.config.mjs found")
+    console.log("❌ No next.config.js found")
   }
 } catch (error) {
   console.error(`❌ Error updating next config: ${error}`)

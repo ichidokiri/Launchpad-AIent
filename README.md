@@ -221,7 +221,7 @@ If the automated script doesn't work, you can manually clean the Next.js cache w
 
 pnpm add dotenv
 
-pnpm exec node -r dotenv/config scripts/check-db.mjs
+node scripts/check-db.js
 
 tsc --noEmit
 

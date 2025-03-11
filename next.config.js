@@ -46,13 +46,7 @@ const nextConfig = {
 
     // Configure redirects
     async redirects() {
-        return [
-            {
-                source: "/home",
-                destination: "/",
-                permanent: true,
-            },
-        ]
+        return [] // Remove all redirects to fix the /home page issue
     },
 
     // Configure image domains

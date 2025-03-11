@@ -3,31 +3,32 @@
 import { useState, useEffect } from "react"
 
 /**
- * Hook to detect if the current device is mobile based on screen width
- * @param breakpoint The width threshold to consider a device as mobile (default: 768px)
- * @returns Boolean indicating if the current device is mobile
+ * A hook to detect if the current device is a mobile device
+ * This is a simplified version to satisfy the sidebar.tsx dependency
+ * @returns A boolean indicating if the current device is mobile
  */
-export function useIsMobile(breakpoint = 768) {
+export function useIsMobile(): boolean {
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    // Function to check if window width is less than the breakpoint
+    // Function to check if the screen width is mobile-sized
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < breakpoint)
+      setIsMobile(window.innerWidth < 768) // Standard mobile breakpoint
     }
 
-    // Check on initial render
+    // Check on mount
     checkMobile()
 
     // Add event listener for window resize
     window.addEventListener("resize", checkMobile)
 
-    // Clean up event listener on component unmount
-    return () => {
-      window.removeEventListener("resize", checkMobile)
-    }
-  }, [breakpoint])
+    // Clean up event listener
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
 
   return isMobile
 }
+
+// Export the hook as both a named export and default export for compatibility
+export default useIsMobile
 
