@@ -16,7 +16,6 @@ import toast from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 import { getAgentCreateDataQueryOptions } from "@/app/create/queries";
 import { useWriteAgentFactoryDeployErc20Token } from "@/generated";
-import { useWaitForTransactionReceipt } from "wagmi";
 import { usePonderQuery } from "@ponder/react";
 import { eq } from "@ponder/client";
 import { eventCreatePool } from "@/ponder/ponder.schema";
@@ -66,108 +65,17 @@ export default function CreateAgentPage() {
     }
   };
 
-  // TODO: pass in the necessary data
-  const handleSubmit = async (params: any) => {
-    setIsSubmitting(true);
-    try {
-      // Validate required fields
-      if (!name) {
-        toast.error("Agent name is required");
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (!symbol) {
-        toast.error("Symbol is required");
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (!agentCreateData?.createFee) {
-        toast.error("Issue price is required");
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (!agentCreateData?.initialAmount) {
-        toast.error("Token amount is required");
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (!avatar) {
-        toast.error("Avatar image is required");
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Prepare the data
-      const agentData = {
-        name,
-        symbol,
-        price: agentCreateData?.createFee
-          ? formatEther(agentCreateData?.createFee)
-          : "",
-        tokenAmount: formatEther(agentCreateData?.initialAmount),
-        description,
-        avatar,
-        txHash, // we need to pass the txHash so we can update the agent with the contract address once it comes through
-        socialLinks,
-      };
-
-      console.log("Submitting agent data:", agentData);
-
-      // Send the data to the backend
-      // TODO: pass in the necessary data
-      const response = await fetch("/api/ai-agents", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(agentData),
-      });
-
-      const data = await response.json();
-      console.log("Response from server:", data);
-
-      if (!response.ok) {
-        throw new Error(data.message || data.error || "Failed to create agent");
-      }
-
-      toast.success("AI Agent created successfully!");
-
-      // Reset form after successful creation
-      setName("");
-      setSymbol("");
-      setDescription("");
-      setAvatar(null);
-      setSocialLinks({
-        x: "",
-        youtube: "",
-        discord: "",
-        github: "",
-      });
-
-      // Redirect to dashboard after a short delay
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 2000);
-    } catch (error) {
-      console.error("Error creating AI Agent:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to create AI Agent"
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const { writeContractAsync: deployAgent, data: txHash } =
     useWriteAgentFactoryDeployErc20Token({
       mutation: {
         onSuccess: async (txHash) => {
-          await handleSubmit(txHash);
+          setIsSubmitting(true);
           toast.success("Your agent is being deployed to the blockchain...");
+        },
+        onError: (error) => {
+          console.error(error);
+          toast.error("Failed to deploy agent.");
+          setIsSubmitting(false);
         },
       },
     });
@@ -178,23 +86,26 @@ export default function CreateAgentPage() {
       db
         .select()
         .from(eventCreatePool)
-        .where(eq(eventCreatePool.txHash, txHash)),
+        .where(eq(eventCreatePool.txHash, txHash || "")),
   });
 
   useEffect(() => {
     if (agentInfo?.length) {
-      const {
-        agentAddress,
-        userAddress,
-        txHash,
-        chainId,
-        virtualEthReserves,
-        virtualTokenReserves,
-      } = agentInfo[0];
-      handleSubmit();
-      // !!!! PASS NECESSARY DATA TO THE SUBMIT FUNCTION
+      setIsSubmitting(false);
+      router.push(`/dashboard`);
     }
   }, [agentInfo]);
+
+  const handleDeployAgent = () => {
+    if (!name || !symbol) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
+    deployAgent({
+      args: [name, symbol, description, avatar || "", socialLinks],
+      value: agentCreateData?.createFee,
+    });
+  };
 
   return (
     <div className="h-screen overflow-auto">
@@ -494,12 +405,7 @@ export default function CreateAgentPage() {
             </div>
 
             <button
-              onClick={() =>
-                deployAgent({
-                  args: [name, symbol],
-                  value: agentCreateData?.createFee,
-                })
-              }
+              onClick={handleDeployAgent}
               disabled={isSubmitting || !name || !symbol}
               className="w-full bg-accent text-white py-2 rounded-md text-sm font-medium hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >

@@ -71,9 +71,10 @@ export const verificationCodes = pgTable("verification_codes", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),
-  email: text("email")
+  userId: text("user_id")
     .notNull()
-    .references(() => users.email),
+    .references(() => users.id),
+  email: text("email").notNull(),
   code: text("code").notNull(),
   expiresAt: timestamp("expires_at").notNull(),
   used: boolean("used").notNull().default(false),

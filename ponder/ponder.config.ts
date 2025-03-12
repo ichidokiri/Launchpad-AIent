@@ -12,7 +12,8 @@ const networks = {
   [monadTestnet.id]: {
     chainId: monadTestnet.id,
     transport: http(process.env[`PONDER_RPC_URL_${monadTestnet.id}`]),
-    pollingInterval: 5000,
+    pollingInterval: 10000,
+    maxRequestsPerSecond: 1,
   },
 } as const satisfies Record<number, NetworkConfig>;
 
@@ -22,14 +23,19 @@ export default createConfig({
     kind: "postgres",
     connectionString: process.env.PONDER_DATABASE_URL,
   },
+
   contracts: {
     agentManager: {
       abi: agentManagerAbi,
       network: {
-        [sepolia.id]: {
-          address: agentManagerAddress[sepolia.id],
-          startBlock: 7878113,
+        [monadTestnet.id]: {
+          address: agentManagerAddress[monadTestnet.id],
+          startBlock: 7443000,
         },
+        // [sepolia.id]: {
+        //   address: agentManagerAddress[sepolia.id],
+        //   startBlock: 7878113,
+        // },
       },
     },
   },

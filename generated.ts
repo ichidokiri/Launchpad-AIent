@@ -204,7 +204,8 @@ export const agentAbi = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const agentFactoryAbi = [
   { type: "constructor", inputs: [], stateMutability: "nonpayable" },
@@ -223,6 +224,19 @@ export const agentFactoryAbi = [
       { name: "agentAddress", internalType: "address", type: "address" },
       { name: "agentName", internalType: "string", type: "string" },
       { name: "agentSymbol", internalType: "string", type: "string" },
+      { name: "description", internalType: "string", type: "string" },
+      { name: "imageUrl", internalType: "string", type: "string" },
+      {
+        name: "socialLinks",
+        internalType: "struct SocialLinks",
+        type: "tuple",
+        components: [
+          { name: "x", internalType: "string", type: "string" },
+          { name: "youtube", internalType: "string", type: "string" },
+          { name: "discord", internalType: "string", type: "string" },
+          { name: "github", internalType: "string", type: "string" },
+        ],
+      },
       { name: "totalSupply", internalType: "uint256", type: "uint256" },
     ],
     stateMutability: "view",
@@ -246,6 +260,19 @@ export const agentFactoryAbi = [
     inputs: [
       { name: "name", internalType: "string", type: "string" },
       { name: "ticker", internalType: "string", type: "string" },
+      { name: "description", internalType: "string", type: "string" },
+      { name: "imageUrl", internalType: "string", type: "string" },
+      {
+        name: "socialLinks",
+        internalType: "struct SocialLinks",
+        type: "tuple",
+        components: [
+          { name: "x", internalType: "string", type: "string" },
+          { name: "youtube", internalType: "string", type: "string" },
+          { name: "discord", internalType: "string", type: "string" },
+          { name: "github", internalType: "string", type: "string" },
+        ],
+      },
     ],
     name: "deployERC20Token",
     outputs: [{ name: "", internalType: "address", type: "address" }],
@@ -275,14 +302,17 @@ export const agentFactoryAbi = [
 ] as const;
 
 /**
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const agentFactoryAddress = {
+  10143: "0xdBFF222D9fAA6e4Cce49F2988273e14ef891450f",
   11155111: "0x539d38511439C407DebE03e2cB0310b589039Fba",
 } as const;
 
 /**
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const agentFactoryConfig = {
   address: agentFactoryAddress,
@@ -294,7 +324,8 @@ export const agentFactoryConfig = {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const agentManagerAbi = [
   {
@@ -340,6 +371,37 @@ export const agentManagerAbi = [
         name: "virtualTokenReserves",
         internalType: "uint256",
         type: "uint256",
+        indexed: false,
+      },
+      { name: "name", internalType: "string", type: "string", indexed: false },
+      {
+        name: "ticker",
+        internalType: "string",
+        type: "string",
+        indexed: false,
+      },
+      {
+        name: "description",
+        internalType: "string",
+        type: "string",
+        indexed: false,
+      },
+      {
+        name: "imageUrl",
+        internalType: "string",
+        type: "string",
+        indexed: false,
+      },
+      {
+        name: "socialLinks",
+        internalType: "struct SocialLinks",
+        type: "tuple",
+        components: [
+          { name: "x", internalType: "string", type: "string" },
+          { name: "youtube", internalType: "string", type: "string" },
+          { name: "discord", internalType: "string", type: "string" },
+          { name: "github", internalType: "string", type: "string" },
+        ],
         indexed: false,
       },
     ],
@@ -510,6 +572,21 @@ export const agentManagerAbi = [
       { name: "agentAddress", internalType: "address", type: "address" },
       { name: "amount", internalType: "uint256", type: "uint256" },
       { name: "agentOwnerAddress", internalType: "address", type: "address" },
+      { name: "name", internalType: "string", type: "string" },
+      { name: "ticker", internalType: "string", type: "string" },
+      { name: "description", internalType: "string", type: "string" },
+      { name: "imageUrl", internalType: "string", type: "string" },
+      {
+        name: "socialLinks",
+        internalType: "struct SocialLinks",
+        type: "tuple",
+        components: [
+          { name: "x", internalType: "string", type: "string" },
+          { name: "youtube", internalType: "string", type: "string" },
+          { name: "discord", internalType: "string", type: "string" },
+          { name: "github", internalType: "string", type: "string" },
+        ],
+      },
     ],
     name: "createPool",
     outputs: [],
@@ -644,14 +721,17 @@ export const agentManagerAbi = [
 ] as const;
 
 /**
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const agentManagerAddress = {
+  10143: "0x64188097A75788471Bb468353C581adA59bB823A",
   11155111: "0xa8CBa74726686462039C015161237E7abE3Be516",
 } as const;
 
 /**
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const agentManagerConfig = {
   address: agentManagerAddress,
@@ -1008,6 +1088,21 @@ export const iAgentManagerAbi = [
       { name: "token", internalType: "address", type: "address" },
       { name: "amount", internalType: "uint256", type: "uint256" },
       { name: "tokenOwner", internalType: "address", type: "address" },
+      { name: "name", internalType: "string", type: "string" },
+      { name: "ticker", internalType: "string", type: "string" },
+      { name: "description", internalType: "string", type: "string" },
+      { name: "imageUrl", internalType: "string", type: "string" },
+      {
+        name: "socialLinks",
+        internalType: "struct SocialLinks",
+        type: "tuple",
+        components: [
+          { name: "x", internalType: "string", type: "string" },
+          { name: "youtube", internalType: "string", type: "string" },
+          { name: "discord", internalType: "string", type: "string" },
+          { name: "github", internalType: "string", type: "string" },
+        ],
+      },
     ],
     name: "createPool",
     outputs: [],
@@ -1703,7 +1798,8 @@ export const watchAgentTransferEvent = /*#__PURE__*/ createWatchContractEvent({
 /**
  * Wraps __{@link readContract}__ with `abi` set to __{@link agentFactoryAbi}__
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const readAgentFactory = /*#__PURE__*/ createReadContract({
   abi: agentFactoryAbi,
@@ -1713,7 +1809,8 @@ export const readAgentFactory = /*#__PURE__*/ createReadContract({
 /**
  * Wraps __{@link readContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"INITIAL_AMOUNT"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const readAgentFactoryInitialAmount = /*#__PURE__*/ createReadContract({
   abi: agentFactoryAbi,
@@ -1724,7 +1821,8 @@ export const readAgentFactoryInitialAmount = /*#__PURE__*/ createReadContract({
 /**
  * Wraps __{@link readContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"agents"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const readAgentFactoryAgents = /*#__PURE__*/ createReadContract({
   abi: agentFactoryAbi,
@@ -1735,7 +1833,8 @@ export const readAgentFactoryAgents = /*#__PURE__*/ createReadContract({
 /**
  * Wraps __{@link readContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"contractAddress"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const readAgentFactoryContractAddress = /*#__PURE__*/ createReadContract(
   {
@@ -1748,7 +1847,8 @@ export const readAgentFactoryContractAddress = /*#__PURE__*/ createReadContract(
 /**
  * Wraps __{@link readContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"currentAgentIndex"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const readAgentFactoryCurrentAgentIndex =
   /*#__PURE__*/ createReadContract({
@@ -1760,7 +1860,8 @@ export const readAgentFactoryCurrentAgentIndex =
 /**
  * Wraps __{@link readContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"owner"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const readAgentFactoryOwner = /*#__PURE__*/ createReadContract({
   abi: agentFactoryAbi,
@@ -1771,7 +1872,8 @@ export const readAgentFactoryOwner = /*#__PURE__*/ createReadContract({
 /**
  * Wraps __{@link writeContract}__ with `abi` set to __{@link agentFactoryAbi}__
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const writeAgentFactory = /*#__PURE__*/ createWriteContract({
   abi: agentFactoryAbi,
@@ -1781,7 +1883,8 @@ export const writeAgentFactory = /*#__PURE__*/ createWriteContract({
 /**
  * Wraps __{@link writeContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"deployERC20Token"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const writeAgentFactoryDeployErc20Token =
   /*#__PURE__*/ createWriteContract({
@@ -1793,7 +1896,8 @@ export const writeAgentFactoryDeployErc20Token =
 /**
  * Wraps __{@link writeContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"setPoolAddress"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const writeAgentFactorySetPoolAddress =
   /*#__PURE__*/ createWriteContract({
@@ -1805,7 +1909,8 @@ export const writeAgentFactorySetPoolAddress =
 /**
  * Wraps __{@link writeContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"transferOwnership"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const writeAgentFactoryTransferOwnership =
   /*#__PURE__*/ createWriteContract({
@@ -1817,7 +1922,8 @@ export const writeAgentFactoryTransferOwnership =
 /**
  * Wraps __{@link simulateContract}__ with `abi` set to __{@link agentFactoryAbi}__
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const simulateAgentFactory = /*#__PURE__*/ createSimulateContract({
   abi: agentFactoryAbi,
@@ -1827,7 +1933,8 @@ export const simulateAgentFactory = /*#__PURE__*/ createSimulateContract({
 /**
  * Wraps __{@link simulateContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"deployERC20Token"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const simulateAgentFactoryDeployErc20Token =
   /*#__PURE__*/ createSimulateContract({
@@ -1839,7 +1946,8 @@ export const simulateAgentFactoryDeployErc20Token =
 /**
  * Wraps __{@link simulateContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"setPoolAddress"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const simulateAgentFactorySetPoolAddress =
   /*#__PURE__*/ createSimulateContract({
@@ -1851,7 +1959,8 @@ export const simulateAgentFactorySetPoolAddress =
 /**
  * Wraps __{@link simulateContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"transferOwnership"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const simulateAgentFactoryTransferOwnership =
   /*#__PURE__*/ createSimulateContract({
@@ -1863,7 +1972,8 @@ export const simulateAgentFactoryTransferOwnership =
 /**
  * Wraps __{@link readContract}__ with `abi` set to __{@link agentManagerAbi}__
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const readAgentManager = /*#__PURE__*/ createReadContract({
   abi: agentManagerAbi,
@@ -1873,7 +1983,8 @@ export const readAgentManager = /*#__PURE__*/ createReadContract({
 /**
  * Wraps __{@link readContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"agentFactory"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const readAgentManagerAgentFactory = /*#__PURE__*/ createReadContract({
   abi: agentManagerAbi,
@@ -1884,7 +1995,8 @@ export const readAgentManagerAgentFactory = /*#__PURE__*/ createReadContract({
 /**
  * Wraps __{@link readContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"bondingCurve"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const readAgentManagerBondingCurve = /*#__PURE__*/ createReadContract({
   abi: agentManagerAbi,
@@ -1895,7 +2007,8 @@ export const readAgentManagerBondingCurve = /*#__PURE__*/ createReadContract({
 /**
  * Wraps __{@link readContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"calculateEthCost"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const readAgentManagerCalculateEthCost =
   /*#__PURE__*/ createReadContract({
@@ -1907,7 +2020,8 @@ export const readAgentManagerCalculateEthCost =
 /**
  * Wraps __{@link readContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"getBondingCurve"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const readAgentManagerGetBondingCurve = /*#__PURE__*/ createReadContract(
   {
@@ -1920,7 +2034,8 @@ export const readAgentManagerGetBondingCurve = /*#__PURE__*/ createReadContract(
 /**
  * Wraps __{@link readContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"getCreateFee"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const readAgentManagerGetCreateFee = /*#__PURE__*/ createReadContract({
   abi: agentManagerAbi,
@@ -1931,7 +2046,8 @@ export const readAgentManagerGetCreateFee = /*#__PURE__*/ createReadContract({
 /**
  * Wraps __{@link writeContract}__ with `abi` set to __{@link agentManagerAbi}__
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const writeAgentManager = /*#__PURE__*/ createWriteContract({
   abi: agentManagerAbi,
@@ -1941,7 +2057,8 @@ export const writeAgentManager = /*#__PURE__*/ createWriteContract({
 /**
  * Wraps __{@link writeContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"buy"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const writeAgentManagerBuy = /*#__PURE__*/ createWriteContract({
   abi: agentManagerAbi,
@@ -1952,7 +2069,8 @@ export const writeAgentManagerBuy = /*#__PURE__*/ createWriteContract({
 /**
  * Wraps __{@link writeContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"createPool"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const writeAgentManagerCreatePool = /*#__PURE__*/ createWriteContract({
   abi: agentManagerAbi,
@@ -1963,7 +2081,8 @@ export const writeAgentManagerCreatePool = /*#__PURE__*/ createWriteContract({
 /**
  * Wraps __{@link writeContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"openTradingOnUniswap"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const writeAgentManagerOpenTradingOnUniswap =
   /*#__PURE__*/ createWriteContract({
@@ -1975,7 +2094,8 @@ export const writeAgentManagerOpenTradingOnUniswap =
 /**
  * Wraps __{@link writeContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"sell"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const writeAgentManagerSell = /*#__PURE__*/ createWriteContract({
   abi: agentManagerAbi,
@@ -1986,7 +2106,8 @@ export const writeAgentManagerSell = /*#__PURE__*/ createWriteContract({
 /**
  * Wraps __{@link writeContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setAgentFactory"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const writeAgentManagerSetAgentFactory =
   /*#__PURE__*/ createWriteContract({
@@ -1998,7 +2119,8 @@ export const writeAgentManagerSetAgentFactory =
 /**
  * Wraps __{@link writeContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setFeeAmount"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const writeAgentManagerSetFeeAmount = /*#__PURE__*/ createWriteContract({
   abi: agentManagerAbi,
@@ -2009,7 +2131,8 @@ export const writeAgentManagerSetFeeAmount = /*#__PURE__*/ createWriteContract({
 /**
  * Wraps __{@link writeContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setFeeRecipient"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const writeAgentManagerSetFeeRecipient =
   /*#__PURE__*/ createWriteContract({
@@ -2021,7 +2144,8 @@ export const writeAgentManagerSetFeeRecipient =
 /**
  * Wraps __{@link writeContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setInitialVirtualReserves"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const writeAgentManagerSetInitialVirtualReserves =
   /*#__PURE__*/ createWriteContract({
@@ -2033,7 +2157,8 @@ export const writeAgentManagerSetInitialVirtualReserves =
 /**
  * Wraps __{@link writeContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setMcapLimit"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const writeAgentManagerSetMcapLimit = /*#__PURE__*/ createWriteContract({
   abi: agentManagerAbi,
@@ -2044,7 +2169,8 @@ export const writeAgentManagerSetMcapLimit = /*#__PURE__*/ createWriteContract({
 /**
  * Wraps __{@link writeContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setOwner"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const writeAgentManagerSetOwner = /*#__PURE__*/ createWriteContract({
   abi: agentManagerAbi,
@@ -2055,7 +2181,8 @@ export const writeAgentManagerSetOwner = /*#__PURE__*/ createWriteContract({
 /**
  * Wraps __{@link writeContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setTotalSupply"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const writeAgentManagerSetTotalSupply =
   /*#__PURE__*/ createWriteContract({
@@ -2067,7 +2194,8 @@ export const writeAgentManagerSetTotalSupply =
 /**
  * Wraps __{@link simulateContract}__ with `abi` set to __{@link agentManagerAbi}__
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const simulateAgentManager = /*#__PURE__*/ createSimulateContract({
   abi: agentManagerAbi,
@@ -2077,7 +2205,8 @@ export const simulateAgentManager = /*#__PURE__*/ createSimulateContract({
 /**
  * Wraps __{@link simulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"buy"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const simulateAgentManagerBuy = /*#__PURE__*/ createSimulateContract({
   abi: agentManagerAbi,
@@ -2088,7 +2217,8 @@ export const simulateAgentManagerBuy = /*#__PURE__*/ createSimulateContract({
 /**
  * Wraps __{@link simulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"createPool"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const simulateAgentManagerCreatePool =
   /*#__PURE__*/ createSimulateContract({
@@ -2100,7 +2230,8 @@ export const simulateAgentManagerCreatePool =
 /**
  * Wraps __{@link simulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"openTradingOnUniswap"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const simulateAgentManagerOpenTradingOnUniswap =
   /*#__PURE__*/ createSimulateContract({
@@ -2112,7 +2243,8 @@ export const simulateAgentManagerOpenTradingOnUniswap =
 /**
  * Wraps __{@link simulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"sell"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const simulateAgentManagerSell = /*#__PURE__*/ createSimulateContract({
   abi: agentManagerAbi,
@@ -2123,7 +2255,8 @@ export const simulateAgentManagerSell = /*#__PURE__*/ createSimulateContract({
 /**
  * Wraps __{@link simulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setAgentFactory"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const simulateAgentManagerSetAgentFactory =
   /*#__PURE__*/ createSimulateContract({
@@ -2135,7 +2268,8 @@ export const simulateAgentManagerSetAgentFactory =
 /**
  * Wraps __{@link simulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setFeeAmount"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const simulateAgentManagerSetFeeAmount =
   /*#__PURE__*/ createSimulateContract({
@@ -2147,7 +2281,8 @@ export const simulateAgentManagerSetFeeAmount =
 /**
  * Wraps __{@link simulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setFeeRecipient"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const simulateAgentManagerSetFeeRecipient =
   /*#__PURE__*/ createSimulateContract({
@@ -2159,7 +2294,8 @@ export const simulateAgentManagerSetFeeRecipient =
 /**
  * Wraps __{@link simulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setInitialVirtualReserves"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const simulateAgentManagerSetInitialVirtualReserves =
   /*#__PURE__*/ createSimulateContract({
@@ -2171,7 +2307,8 @@ export const simulateAgentManagerSetInitialVirtualReserves =
 /**
  * Wraps __{@link simulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setMcapLimit"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const simulateAgentManagerSetMcapLimit =
   /*#__PURE__*/ createSimulateContract({
@@ -2183,7 +2320,8 @@ export const simulateAgentManagerSetMcapLimit =
 /**
  * Wraps __{@link simulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setOwner"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const simulateAgentManagerSetOwner =
   /*#__PURE__*/ createSimulateContract({
@@ -2195,7 +2333,8 @@ export const simulateAgentManagerSetOwner =
 /**
  * Wraps __{@link simulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setTotalSupply"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const simulateAgentManagerSetTotalSupply =
   /*#__PURE__*/ createSimulateContract({
@@ -2207,7 +2346,8 @@ export const simulateAgentManagerSetTotalSupply =
 /**
  * Wraps __{@link watchContractEvent}__ with `abi` set to __{@link agentManagerAbi}__
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const watchAgentManagerEvent = /*#__PURE__*/ createWatchContractEvent({
   abi: agentManagerAbi,
@@ -2217,7 +2357,8 @@ export const watchAgentManagerEvent = /*#__PURE__*/ createWatchContractEvent({
 /**
  * Wraps __{@link watchContractEvent}__ with `abi` set to __{@link agentManagerAbi}__ and `eventName` set to `"Complete"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const watchAgentManagerCompleteEvent =
   /*#__PURE__*/ createWatchContractEvent({
@@ -2229,7 +2370,8 @@ export const watchAgentManagerCompleteEvent =
 /**
  * Wraps __{@link watchContractEvent}__ with `abi` set to __{@link agentManagerAbi}__ and `eventName` set to `"CreatePool"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const watchAgentManagerCreatePoolEvent =
   /*#__PURE__*/ createWatchContractEvent({
@@ -2241,7 +2383,8 @@ export const watchAgentManagerCreatePoolEvent =
 /**
  * Wraps __{@link watchContractEvent}__ with `abi` set to __{@link agentManagerAbi}__ and `eventName` set to `"OpenTradingOnUniswap"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const watchAgentManagerOpenTradingOnUniswapEvent =
   /*#__PURE__*/ createWatchContractEvent({
@@ -2253,7 +2396,8 @@ export const watchAgentManagerOpenTradingOnUniswapEvent =
 /**
  * Wraps __{@link watchContractEvent}__ with `abi` set to __{@link agentManagerAbi}__ and `eventName` set to `"Trade"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const watchAgentManagerTradeEvent =
   /*#__PURE__*/ createWatchContractEvent({
@@ -3230,7 +3374,8 @@ export const useWatchAgentTransferEvent =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link agentFactoryAbi}__
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const useReadAgentFactory = /*#__PURE__*/ createUseReadContract({
   abi: agentFactoryAbi,
@@ -3240,7 +3385,8 @@ export const useReadAgentFactory = /*#__PURE__*/ createUseReadContract({
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"INITIAL_AMOUNT"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const useReadAgentFactoryInitialAmount =
   /*#__PURE__*/ createUseReadContract({
@@ -3252,7 +3398,8 @@ export const useReadAgentFactoryInitialAmount =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"agents"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const useReadAgentFactoryAgents = /*#__PURE__*/ createUseReadContract({
   abi: agentFactoryAbi,
@@ -3263,7 +3410,8 @@ export const useReadAgentFactoryAgents = /*#__PURE__*/ createUseReadContract({
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"contractAddress"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const useReadAgentFactoryContractAddress =
   /*#__PURE__*/ createUseReadContract({
@@ -3275,7 +3423,8 @@ export const useReadAgentFactoryContractAddress =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"currentAgentIndex"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const useReadAgentFactoryCurrentAgentIndex =
   /*#__PURE__*/ createUseReadContract({
@@ -3287,7 +3436,8 @@ export const useReadAgentFactoryCurrentAgentIndex =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"owner"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const useReadAgentFactoryOwner = /*#__PURE__*/ createUseReadContract({
   abi: agentFactoryAbi,
@@ -3298,7 +3448,8 @@ export const useReadAgentFactoryOwner = /*#__PURE__*/ createUseReadContract({
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link agentFactoryAbi}__
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const useWriteAgentFactory = /*#__PURE__*/ createUseWriteContract({
   abi: agentFactoryAbi,
@@ -3308,7 +3459,8 @@ export const useWriteAgentFactory = /*#__PURE__*/ createUseWriteContract({
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"deployERC20Token"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const useWriteAgentFactoryDeployErc20Token =
   /*#__PURE__*/ createUseWriteContract({
@@ -3320,7 +3472,8 @@ export const useWriteAgentFactoryDeployErc20Token =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"setPoolAddress"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const useWriteAgentFactorySetPoolAddress =
   /*#__PURE__*/ createUseWriteContract({
@@ -3332,7 +3485,8 @@ export const useWriteAgentFactorySetPoolAddress =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"transferOwnership"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const useWriteAgentFactoryTransferOwnership =
   /*#__PURE__*/ createUseWriteContract({
@@ -3344,7 +3498,8 @@ export const useWriteAgentFactoryTransferOwnership =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link agentFactoryAbi}__
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const useSimulateAgentFactory = /*#__PURE__*/ createUseSimulateContract({
   abi: agentFactoryAbi,
@@ -3354,7 +3509,8 @@ export const useSimulateAgentFactory = /*#__PURE__*/ createUseSimulateContract({
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"deployERC20Token"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const useSimulateAgentFactoryDeployErc20Token =
   /*#__PURE__*/ createUseSimulateContract({
@@ -3366,7 +3522,8 @@ export const useSimulateAgentFactoryDeployErc20Token =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"setPoolAddress"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const useSimulateAgentFactorySetPoolAddress =
   /*#__PURE__*/ createUseSimulateContract({
@@ -3378,7 +3535,8 @@ export const useSimulateAgentFactorySetPoolAddress =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link agentFactoryAbi}__ and `functionName` set to `"transferOwnership"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0xdbff222d9faa6e4cce49f2988273e14ef891450f)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0x539d38511439c407debe03e2cb0310b589039fba)
  */
 export const useSimulateAgentFactoryTransferOwnership =
   /*#__PURE__*/ createUseSimulateContract({
@@ -3390,7 +3548,8 @@ export const useSimulateAgentFactoryTransferOwnership =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link agentManagerAbi}__
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useReadAgentManager = /*#__PURE__*/ createUseReadContract({
   abi: agentManagerAbi,
@@ -3400,7 +3559,8 @@ export const useReadAgentManager = /*#__PURE__*/ createUseReadContract({
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"agentFactory"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useReadAgentManagerAgentFactory =
   /*#__PURE__*/ createUseReadContract({
@@ -3412,7 +3572,8 @@ export const useReadAgentManagerAgentFactory =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"bondingCurve"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useReadAgentManagerBondingCurve =
   /*#__PURE__*/ createUseReadContract({
@@ -3424,7 +3585,8 @@ export const useReadAgentManagerBondingCurve =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"calculateEthCost"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useReadAgentManagerCalculateEthCost =
   /*#__PURE__*/ createUseReadContract({
@@ -3436,7 +3598,8 @@ export const useReadAgentManagerCalculateEthCost =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"getBondingCurve"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useReadAgentManagerGetBondingCurve =
   /*#__PURE__*/ createUseReadContract({
@@ -3448,7 +3611,8 @@ export const useReadAgentManagerGetBondingCurve =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"getCreateFee"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useReadAgentManagerGetCreateFee =
   /*#__PURE__*/ createUseReadContract({
@@ -3460,7 +3624,8 @@ export const useReadAgentManagerGetCreateFee =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link agentManagerAbi}__
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useWriteAgentManager = /*#__PURE__*/ createUseWriteContract({
   abi: agentManagerAbi,
@@ -3470,7 +3635,8 @@ export const useWriteAgentManager = /*#__PURE__*/ createUseWriteContract({
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"buy"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useWriteAgentManagerBuy = /*#__PURE__*/ createUseWriteContract({
   abi: agentManagerAbi,
@@ -3481,7 +3647,8 @@ export const useWriteAgentManagerBuy = /*#__PURE__*/ createUseWriteContract({
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"createPool"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useWriteAgentManagerCreatePool =
   /*#__PURE__*/ createUseWriteContract({
@@ -3493,7 +3660,8 @@ export const useWriteAgentManagerCreatePool =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"openTradingOnUniswap"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useWriteAgentManagerOpenTradingOnUniswap =
   /*#__PURE__*/ createUseWriteContract({
@@ -3505,7 +3673,8 @@ export const useWriteAgentManagerOpenTradingOnUniswap =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"sell"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useWriteAgentManagerSell = /*#__PURE__*/ createUseWriteContract({
   abi: agentManagerAbi,
@@ -3516,7 +3685,8 @@ export const useWriteAgentManagerSell = /*#__PURE__*/ createUseWriteContract({
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setAgentFactory"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useWriteAgentManagerSetAgentFactory =
   /*#__PURE__*/ createUseWriteContract({
@@ -3528,7 +3698,8 @@ export const useWriteAgentManagerSetAgentFactory =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setFeeAmount"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useWriteAgentManagerSetFeeAmount =
   /*#__PURE__*/ createUseWriteContract({
@@ -3540,7 +3711,8 @@ export const useWriteAgentManagerSetFeeAmount =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setFeeRecipient"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useWriteAgentManagerSetFeeRecipient =
   /*#__PURE__*/ createUseWriteContract({
@@ -3552,7 +3724,8 @@ export const useWriteAgentManagerSetFeeRecipient =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setInitialVirtualReserves"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useWriteAgentManagerSetInitialVirtualReserves =
   /*#__PURE__*/ createUseWriteContract({
@@ -3564,7 +3737,8 @@ export const useWriteAgentManagerSetInitialVirtualReserves =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setMcapLimit"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useWriteAgentManagerSetMcapLimit =
   /*#__PURE__*/ createUseWriteContract({
@@ -3576,7 +3750,8 @@ export const useWriteAgentManagerSetMcapLimit =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setOwner"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useWriteAgentManagerSetOwner =
   /*#__PURE__*/ createUseWriteContract({
@@ -3588,7 +3763,8 @@ export const useWriteAgentManagerSetOwner =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setTotalSupply"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useWriteAgentManagerSetTotalSupply =
   /*#__PURE__*/ createUseWriteContract({
@@ -3600,7 +3776,8 @@ export const useWriteAgentManagerSetTotalSupply =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link agentManagerAbi}__
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useSimulateAgentManager = /*#__PURE__*/ createUseSimulateContract({
   abi: agentManagerAbi,
@@ -3610,7 +3787,8 @@ export const useSimulateAgentManager = /*#__PURE__*/ createUseSimulateContract({
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"buy"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useSimulateAgentManagerBuy =
   /*#__PURE__*/ createUseSimulateContract({
@@ -3622,7 +3800,8 @@ export const useSimulateAgentManagerBuy =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"createPool"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useSimulateAgentManagerCreatePool =
   /*#__PURE__*/ createUseSimulateContract({
@@ -3634,7 +3813,8 @@ export const useSimulateAgentManagerCreatePool =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"openTradingOnUniswap"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useSimulateAgentManagerOpenTradingOnUniswap =
   /*#__PURE__*/ createUseSimulateContract({
@@ -3646,7 +3826,8 @@ export const useSimulateAgentManagerOpenTradingOnUniswap =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"sell"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useSimulateAgentManagerSell =
   /*#__PURE__*/ createUseSimulateContract({
@@ -3658,7 +3839,8 @@ export const useSimulateAgentManagerSell =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setAgentFactory"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useSimulateAgentManagerSetAgentFactory =
   /*#__PURE__*/ createUseSimulateContract({
@@ -3670,7 +3852,8 @@ export const useSimulateAgentManagerSetAgentFactory =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setFeeAmount"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useSimulateAgentManagerSetFeeAmount =
   /*#__PURE__*/ createUseSimulateContract({
@@ -3682,7 +3865,8 @@ export const useSimulateAgentManagerSetFeeAmount =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setFeeRecipient"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useSimulateAgentManagerSetFeeRecipient =
   /*#__PURE__*/ createUseSimulateContract({
@@ -3694,7 +3878,8 @@ export const useSimulateAgentManagerSetFeeRecipient =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setInitialVirtualReserves"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useSimulateAgentManagerSetInitialVirtualReserves =
   /*#__PURE__*/ createUseSimulateContract({
@@ -3706,7 +3891,8 @@ export const useSimulateAgentManagerSetInitialVirtualReserves =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setMcapLimit"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useSimulateAgentManagerSetMcapLimit =
   /*#__PURE__*/ createUseSimulateContract({
@@ -3718,7 +3904,8 @@ export const useSimulateAgentManagerSetMcapLimit =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setOwner"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useSimulateAgentManagerSetOwner =
   /*#__PURE__*/ createUseSimulateContract({
@@ -3730,7 +3917,8 @@ export const useSimulateAgentManagerSetOwner =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link agentManagerAbi}__ and `functionName` set to `"setTotalSupply"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useSimulateAgentManagerSetTotalSupply =
   /*#__PURE__*/ createUseSimulateContract({
@@ -3742,7 +3930,8 @@ export const useSimulateAgentManagerSetTotalSupply =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link agentManagerAbi}__
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useWatchAgentManagerEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
@@ -3753,7 +3942,8 @@ export const useWatchAgentManagerEvent =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link agentManagerAbi}__ and `eventName` set to `"Complete"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useWatchAgentManagerCompleteEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
@@ -3765,7 +3955,8 @@ export const useWatchAgentManagerCompleteEvent =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link agentManagerAbi}__ and `eventName` set to `"CreatePool"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useWatchAgentManagerCreatePoolEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
@@ -3777,7 +3968,8 @@ export const useWatchAgentManagerCreatePoolEvent =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link agentManagerAbi}__ and `eventName` set to `"OpenTradingOnUniswap"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useWatchAgentManagerOpenTradingOnUniswapEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
@@ -3789,7 +3981,8 @@ export const useWatchAgentManagerOpenTradingOnUniswapEvent =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link agentManagerAbi}__ and `eventName` set to `"Trade"`
  *
- * [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
+ * - [__View Contract on Monad Testnet Monad Testnet Explorer__](https://testnet.monadexplorer.com/address/0x64188097a75788471bb468353c581ada59bb823a)
+ * - [__View Contract on Sepolia Etherscan__](https://sepolia.etherscan.io/address/0xa8cba74726686462039c015161237e7abe3be516)
  */
 export const useWatchAgentManagerTradeEvent =
   /*#__PURE__*/ createUseWatchContractEvent({

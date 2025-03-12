@@ -6,23 +6,36 @@
 import { onchainTable, primaryKey, index } from "ponder";
 import { SupportedChainIds } from "./ponder.config";
 
+type SocialLink = {
+  x: string;
+  youtube: string;
+  github: string;
+  discord: string;
+};
+
 export const eventCreatePool = onchainTable(
   "event_create_pool",
   (t) => ({
+    txHash: t.hex().notNull().primaryKey(),
     userAddress: t.hex().notNull(),
     agentAddress: t.hex().notNull(),
     virtualEthReserves: t.bigint().notNull(),
     virtualTokenReserves: t.bigint().notNull(),
     timestamp: t.bigint().notNull(),
-    txHash: t.hex().notNull(),
     chainId: t.integer().notNull().$type<SupportedChainIds>(),
+    name: t.text().notNull(),
+    ticker: t.text().notNull(),
+    description: t.text().notNull(),
+    imageUrl: t.text().notNull(),
+    socialLinks: t.jsonb().notNull().$type<SocialLink>(),
   }),
   (t) => ({
-    pk: primaryKey({ columns: [t.userAddress, t.agentAddress] }),
     idxAgentAddress: index().on(t.agentAddress),
     idxUserAddress: index().on(t.userAddress),
   })
 );
+
+export type EventCreatePool = typeof eventCreatePool.$inferSelect;
 
 // event Complete(address indexed user, address indexed  mint, uint256 timestamp);
 export const eventComplete = onchainTable(

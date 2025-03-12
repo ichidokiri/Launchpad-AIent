@@ -8,12 +8,18 @@ ponder.on("agentManager:CreatePool", async ({ event, context }) => {
   /**
    * @dev handle create pool event (update agent address in db? set user pools?)
    */
+
   await context.db.insert(schema.eventCreatePool).values({
     txHash: event.transaction.hash,
     userAddress: event.args.user,
     agentAddress: event.args.mint,
     virtualEthReserves: event.args.virtualEthReserves,
     virtualTokenReserves: event.args.virtualTokenReserves,
+    name: event.args.name,
+    ticker: event.args.ticker,
+    description: event.args.description,
+    imageUrl: event.args.imageUrl,
+    socialLinks: event.args.socialLinks,
     timestamp: event.block.timestamp,
     chainId: context.network.chainId,
   });
