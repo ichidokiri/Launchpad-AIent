@@ -13,13 +13,14 @@ export async function generateCSRFToken() {
 
   // Sign the hash in a JWT
   const jwt = await new SignJWT({ hash })
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime("1h")
-    .sign(secret)
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime("1h")
+      .sign(secret)
 
   // Set the JWT in a cookie
-  cookies().set("csrf", jwt, {
+  const cookieStore = await cookies()
+  cookieStore.set("csrf", jwt, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -33,7 +34,8 @@ export async function generateCSRFToken() {
 export async function validateCSRFToken(token: string) {
   try {
     // Get the JWT from cookies
-    const jwt = cookies().get("csrf")?.value
+    const cookieStore = await cookies()
+    const jwt = cookieStore.get("csrf")?.value
     if (!jwt) return false
 
     // Verify the JWT and extract the hash

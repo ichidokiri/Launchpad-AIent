@@ -39,8 +39,8 @@ try {
 
     // Disable experimental features that might be causing issues
     nextConfig = nextConfig.replace(
-        /experimental:\s*{[^}]*}/,
-        `experimental: {
+      /experimental:\s*{[^}]*}/,
+      `experimental: {
       serverComponentsExternalPackages: ["@prisma/client", "bcryptjs"],
       outputFileTracingRoot: undefined,
       // Disable features that might be causing build issues

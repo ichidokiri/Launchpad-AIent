@@ -2,10 +2,12 @@
 const nextConfig = {
   // Enable experimental features with safer options
   experimental: {
-    serverComponentsExternalPackages: ["@prisma/client", "bcryptjs"],
-    outputFileTracingRoot: undefined, // Disable advanced file tracing to avoid symlink issues
-    optimizeCss: false, // Disable CSS optimization
-    swcMinify: true, // Use SWC minifier instead of Terser
+    // Update serverActions to use the correct format for Next.js 15.1.0
+    serverActions: {
+      bodySizeLimit: "2mb",
+    },
+    // Use serverExternalPackages instead of serverComponentsExternalPackages
+    serverExternalPackages: ["@prisma/client", "bcryptjs"],
   },
 
   // Configure headers for security
@@ -45,13 +47,7 @@ const nextConfig = {
 
   // Configure redirects
   async redirects() {
-    return [
-      {
-        source: "/home",
-        destination: "/",
-        permanent: true,
-      },
-    ]
+    return [] // Remove all redirects to fix the /home page issue
   },
 
   // Configure image domains
@@ -69,10 +65,12 @@ const nextConfig = {
         hostname: "hebbkx1anhila5yf.public.blob.vercel-storage.com",
       },
     ],
+    domains: ["placeholder.svg", "localhost"],
   },
 
   // Remove the standalone output setting to avoid symlink issues
   poweredByHeader: false,
+  reactStrictMode: true,
 }
 
 module.exports = nextConfig

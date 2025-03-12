@@ -1,26 +1,42 @@
 "use client"
 
 import type React from "react"
+
 import { useState } from "react"
-import Image from "next/image"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
+import Link from "next/link"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { signupUser } from "@/app/actions"
-import Link from "next/link"
-import { Divider } from "@/components/divider"
-import toast from "react-hot-toast"
+import { toast } from "react-hot-toast"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import { Web3Login } from "@/components/web3-login"
 
 export default function RegisterPage() {
   const router = useRouter()
-  const [showPassword, setShowPassword] = useState(false)
+
+  // Form state
+  const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     // Client-side validation
+    if (!name.trim()) {
+      toast.error("Name is required")
+      return
+    }
+
     if (!email.trim()) {
       toast.error("Email is required")
       return
@@ -28,6 +44,11 @@ export default function RegisterPage() {
 
     if (!password.trim()) {
       toast.error("Password is required")
+      return
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match")
       return
     }
 
@@ -39,7 +60,7 @@ export default function RegisterPage() {
     setIsLoading(true)
 
     try {
-      const result = await signupUser({ email, password })
+      const result = await signupUser({ name, email, password })
 
       if (result.success) {
         toast.success(result.message || "Registration successful!")
@@ -60,73 +81,120 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8 bg-card rounded-lg p-8 shadow-lg border border-border">
-        <div className="flex flex-col items-center justify-center">
-          <div className="w-24 h-24">
-            <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-RB1wlyGjhABEyhpwuZsvED6ZCpgyHC.png"
-              alt="AIent Logo"
-              width={96}
-              height={96}
-              className="object-contain dark:invert"
-            />
-          </div>
-          <h1 className="text-2xl font-light mt-4 mb-8">Welcome to AIent 👋</h1>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            <div className="relative">
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg bg-background border border-input focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground text-sm"
-              />
+    <div className="min-h-screen flex items-center justify-center p-4 bg-black">
+      <div className="w-full max-w-md">
+        <Card className="bg-[#1f1f1f] border-gray-800">
+          <CardHeader className="space-y-1 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 relative">
+                <Image
+                  src="/placeholder.svg?height=64&width=64&text=AI"
+                  alt="TradeGPT Logo"
+                  width={64}
+                  height={64}
+                  className="rounded-full"
+                />
+              </div>
             </div>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg bg-background border border-input focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground text-sm pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
+            <CardTitle className="text-2xl font-bold text-white">Create an Account</CardTitle>
+            <CardDescription className="text-gray-400">
+              Enter your details to register for TradeGPT Launchpad
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Input
+                  type="text"
+                  placeholder="Full Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="bg-[#2a2a2a] border-gray-700 text-white placeholder:text-gray-500"
+                />
+              </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Registering...
-              </>
-            ) : (
-              "Register"
-            )}
-          </button>
-        </form>
+              <div className="space-y-2">
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-[#2a2a2a] border-gray-700 text-white placeholder:text-gray-500"
+                />
+              </div>
 
-        <Divider />
+              <div className="space-y-2 relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-[#2a2a2a] border-gray-700 text-white placeholder:text-gray-500 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
 
-        <div className="text-center space-y-2">
-          <p className="text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link href="/login" className="text-primary hover:underline">
-              Log in
+              <div className="space-y-2 relative">
+                <Input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="bg-[#2a2a2a] border-gray-700 text-white placeholder:text-gray-500 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+
+              <Button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating Account...
+                  </>
+                ) : (
+                  "Create Account"
+                )}
+              </Button>
+
+              <Separator className="my-4 bg-gray-700" />
+
+              <div className="text-center space-y-2">
+                <p className="text-sm text-gray-400">
+                  Already have an account?{" "}
+                  <Link href="/login" className="text-blue-400 hover:underline">
+                    Log in
+                  </Link>
+                </p>
+
+                <div className="flex items-center justify-center gap-4 mt-4">
+                  <Web3Login />
+                </div>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+
+        <div className="mt-4 text-center">
+          <p className="text-xs text-gray-500">
+            By registering, you agree to our{" "}
+            <Link href="/terms" className="text-blue-400 hover:underline">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="text-blue-400 hover:underline">
+              Privacy Policy
             </Link>
           </p>
         </div>

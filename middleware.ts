@@ -51,13 +51,13 @@ export async function middleware(request: NextRequest) {
     // If this is an admin route and the user is not an admin, redirect to dashboard
     // Check for both uppercase and lowercase versions for compatibility
     if (
-      isAdminRoute &&
-      user?.role !== UserRole.ADMIN &&
-      user?.role !== UserRole.SUPERADMIN &&
-      user?.role !== "ADMIN" &&
-      user?.role !== "SUPERADMIN" &&
-      user?.role !== "admin" &&
-      user?.role !== "superadmin"
+        isAdminRoute &&
+        user?.role !== UserRole.ADMIN &&
+        user?.role !== UserRole.SUPERADMIN &&
+        user?.role !== "ADMIN" &&
+        user?.role !== "SUPERADMIN" &&
+        user?.role !== "admin" &&
+        user?.role !== "superadmin"
     ) {
       return NextResponse.redirect(new URL("/dashboard", request.url))
     }

@@ -24,13 +24,35 @@ interface RateLimitInfo {
 const rateLimit = new Map<string, RateLimitInfo>()
 
 /**
+ * Get the client IP address from request headers
+ * @param req The incoming request
+ * @returns The client IP address or "unknown"
+ */
+function getClientIp(req: NextRequest): string {
+  // Try to get IP from various headers
+  const forwardedFor = req.headers.get("x-forwarded-for")
+  if (forwardedFor) {
+    // x-forwarded-for can contain multiple IPs, take the first one
+    return forwardedFor.split(",")[0].trim()
+  }
+
+  const realIp = req.headers.get("x-real-ip")
+  if (realIp) {
+    return realIp
+  }
+
+  // If no IP found in headers, return unknown
+  return "unknown"
+}
+
+/**
  * Rate limiting middleware for API routes
  * @param req The incoming request
  * @returns NextResponse if rate limit is exceeded, null otherwise
  */
 export function rateLimiter(req: NextRequest): NextResponse | null {
   // Get client IP
-  const ip = req.ip || "unknown"
+  const ip = getClientIp(req)
   const now = Date.now()
 
   // Get or initialize rate limit info for this IP
@@ -60,8 +82,8 @@ export function rateLimiter(req: NextRequest): NextResponse | null {
 
     // IP is blocked
     return NextResponse.json(
-      { error: "Too many requests. Please try again later." },
-      { status: 429, headers: { "Retry-After": "300" } },
+        { error: "Too many requests. Please try again later." },
+        { status: 429, headers: { "Retry-After": "300" } },
     )
   }
 
@@ -85,8 +107,8 @@ export function rateLimiter(req: NextRequest): NextResponse | null {
       rateLimit.set(ip, info)
 
       return NextResponse.json(
-        { error: "Too many requests. Please try again later." },
-        { status: 429, headers: { "Retry-After": "300" } },
+          { error: "Too many requests. Please try again later." },
+          { status: 429, headers: { "Retry-After": "300" } },
       )
     }
 
@@ -96,8 +118,8 @@ export function rateLimiter(req: NextRequest): NextResponse | null {
     rateLimit.set(ip, info)
 
     return NextResponse.json(
-      { error: "Rate limit exceeded. Please try again later." },
-      { status: 429, headers: { "Retry-After": "60" } },
+        { error: "Rate limit exceeded. Please try again later." },
+        { status: 429, headers: { "Retry-After": "60" } },
     )
   }
 

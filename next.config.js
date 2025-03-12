@@ -2,11 +2,12 @@
 const nextConfig = {
     // Enable experimental features with safer options
     experimental: {
-      serverComponentsExternalPackages: ["@prisma/client", "bcryptjs"],
-      outputFileTracingRoot: undefined,
-      // Disable features that might be causing build issues
-      optimizeCss: false,
-      swcMinify: true
+        // Update serverActions to use the correct format for Next.js 15.1.0
+        serverActions: {
+            bodySizeLimit: "2mb",
+        },
+        // Use serverExternalPackages instead of serverComponentsExternalPackages
+        serverExternalPackages: ["@prisma/client", "bcryptjs"],
     },
 
     // Configure headers for security

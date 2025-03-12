@@ -159,3 +159,13 @@ export default function LoginPage() {
   )
 }
 
+// This file contains the complete login functionality:
+// - Email and password inputs
+// - Form validation
+// - Login submission
+// - Error handling
+// - Loading states
+// - Links to forgot password and registration
+
+// The login page is accessible at /login
+

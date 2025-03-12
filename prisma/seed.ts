@@ -108,12 +108,12 @@ async function main() {
 
 // Execute the seed function
 main()
-    .catch((e) => {
-      console.error("Error during database seeding:", e)
-      process.exit(1)
-    })
-    .finally(async () => {
-      // Close Prisma client connection
-      await prisma.$disconnect()
-    })
+  .catch((e) => {
+    console.error("Error during database seeding:", e)
+    process.exit(1)
+  })
+  .finally(async () => {
+    // Close Prisma client connection
+    await prisma.$disconnect()
+  })
 
