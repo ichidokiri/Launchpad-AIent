@@ -507,7 +507,7 @@ export default function DashboardPage() {
                           </span>
                         </div>
                         <Link
-                          href={`/market/${agent.ticker}`}
+                          href={`/market/${agent.agentAddress}`}
                           className="flex items-center text-sm text-gray-300 hover:text-white"
                         >
                           View Details
