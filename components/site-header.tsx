@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/app/context/AuthContext";
 import { Wallet, User } from "lucide-react";
-import { useState } from "react";
 import { ThemeToggle } from "./theme-toggle";
 import {
   DropdownMenu,
@@ -120,7 +119,7 @@ export function SiteHeader() {
                     className="cursor-pointer"
                     onSelect={(e) => {
                       e.preventDefault();
-                      handleLogout();
+                      logout();
                     }}
                   >
                     Log out

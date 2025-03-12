@@ -18,6 +18,7 @@ import type { NextRequest } from "next/server";
 export async function POST(req: Request) {
   try {
     // Get the authenticated user
+    // TODO tie down the create page to only allow logged in users
     const user = await auth(req);
     if (!user) {
       return NextResponse.json(
@@ -27,7 +28,8 @@ export async function POST(req: Request) {
     }
 
     const data = await req.json();
-    const { name, symbol, description, price, tokenAmount, avatar } = data;
+    const { name, symbol, description, price, tokenAmount, avatar, txHash } =
+      data;
 
     // Validate required fields
     if (!name || !symbol || !price || !tokenAmount) {
@@ -74,6 +76,7 @@ export async function POST(req: Request) {
       );
     }
 
+    // ! why find the user again?
     // Find the user in the database
     const dbUser = await prisma.user.findUnique({
       where: { email: user.email },

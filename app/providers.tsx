@@ -6,15 +6,19 @@ import { WagmiProvider } from "wagmi";
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 
 import { useState } from "react";
-import { wagmiConfig } from "@/lib/web3";
+import { getWagmiConfig } from "@/lib/web3";
+import { client } from "@/lib/ponder";
+import { PonderProvider } from "@ponder/react";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>{children}</RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <PonderProvider client={client}>
+      <WagmiProvider config={getWagmiConfig()}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider>{children}</RainbowKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </PonderProvider>
   );
 }

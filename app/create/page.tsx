@@ -1,41 +1,15 @@
-"use client"
+import SelectionPanel from "@/components/selection-panel";
+import CreateAgentPage from "@/components/create-agent-page";
+import ChatInterface from "@/components/chat-interface";
+import { Toaster } from "react-hot-toast";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import SelectionPanel from "@/components/selection-panel"
-import CreateAgentPage from "@/components/create-agent-page"
-import ChatInterface from "@/components/chat-interface"
-import { Toaster } from "react-hot-toast"
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { getQueryClient } from "@/lib/utils";
+import { getAgentCreateDataQueryOptions } from "./queries";
 
-export default function CreatePage() {
-  const router = useRouter()
-  const [formData, setFormData] = useState<{
-    name: string
-    symbol: string
-    price: number
-    tokenAmount: number
-    description: string
-    avatar: string | null
-  }>({
-    name: "",
-    symbol: "",
-    price: 0,
-    tokenAmount: 0,
-    description: "",
-    avatar: null,
-  })
-
-  // Function to collect data from child components
-  const updateFormData = (data: {
-    name?: string
-    symbol?: string
-    price?: number
-    tokenAmount?: number
-    description?: string
-    avatar?: string | null
-  }) => {
-    setFormData((prev) => ({ ...prev, ...data }))
-  }
+export default async function CreatePage() {
+  const queryClient = getQueryClient();
+  await queryClient.prefetchQuery(getAgentCreateDataQueryOptions);
 
   return (
     <div className="container mx-auto py-8">
@@ -44,16 +18,22 @@ export default function CreatePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Agent Details Section */}
         <div className="bg-[#1f1f1f] rounded-lg shadow-md p-4 border border-gray-700">
-          <h2 className="text-xl font-semibold mb-3 text-white">Agent Details</h2>
+          <h2 className="text-xl font-semibold mb-3 text-white">
+            Agent Details
+          </h2>
           {/* Agent details content */}
           <SelectionPanel />
         </div>
 
         {/* AI Configuration Section */}
         <div className="bg-[#1f1f1f] rounded-lg shadow-md p-4 border border-gray-700">
-          <h2 className="text-xl font-semibold mb-3 text-white">AI Configuration</h2>
+          <h2 className="text-xl font-semibold mb-3 text-white">
+            AI Configuration
+          </h2>
           {/* AI configuration content */}
-          <CreateAgentPage />
+          <HydrationBoundary state={dehydrate(queryClient)}>
+            <CreateAgentPage />
+          </HydrationBoundary>
         </div>
 
         {/* Preview Section */}
@@ -74,6 +54,5 @@ export default function CreatePage() {
         }}
       />
     </div>
-  )
+  );
 }
-

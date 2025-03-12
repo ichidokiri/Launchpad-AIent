@@ -8,6 +8,10 @@ export function cn(...inputs: ClassValue[]) {
 
 export function getQueryClient() {
   return new QueryClient({
-    defaultOptions: {},
+    defaultOptions: {
+      queries: {
+        refetchOnMount: false,
+      },
+    },
   });
 }
