@@ -13,14 +13,29 @@ type SocialLink = {
   discord: string;
 };
 
-export const eventCreatePool = onchainTable(
-  "event_create_pool",
+export const agent = onchainTable(
+  "agent",
   (t) => ({
-    txHash: t.hex().notNull().primaryKey(),
+    txHash: t.hex().notNull(),
     userAddress: t.hex().notNull(),
     agentAddress: t.hex().notNull(),
     virtualEthReserves: t.bigint().notNull(),
     virtualTokenReserves: t.bigint().notNull(),
+    uniswapV2Pair: t.hex(),
+    complete: t.boolean().notNull().default(false),
+    marketCapLimit: t
+      .bigint()
+      .notNull()
+      .default(10n ** 23n),
+    tokenTotalSupply: t
+      .bigint()
+      .notNull()
+      .default(10n ** 27n),
+    realTokenReserves: t
+      .bigint()
+      .notNull()
+      .default(10n ** 27n),
+    realEthReserves: t.bigint().notNull().default(0n),
     timestamp: t.bigint().notNull(),
     chainId: t.integer().notNull().$type<SupportedChainIds>(),
     name: t.text().notNull(),
@@ -32,10 +47,11 @@ export const eventCreatePool = onchainTable(
   (t) => ({
     idxAgentAddress: index().on(t.agentAddress),
     idxUserAddress: index().on(t.userAddress),
+    pk: primaryKey({ columns: [t.agentAddress, t.chainId] }),
   })
 );
 
-export type EventCreatePool = typeof eventCreatePool.$inferSelect;
+export type Agent = typeof agent.$inferSelect;
 
 // event Complete(address indexed user, address indexed  mint, uint256 timestamp);
 export const eventComplete = onchainTable(

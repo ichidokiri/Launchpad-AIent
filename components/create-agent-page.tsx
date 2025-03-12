@@ -18,7 +18,7 @@ import { getAgentCreateDataQueryOptions } from "@/app/create/queries";
 import { useWriteAgentFactoryDeployErc20Token } from "@/generated";
 import { usePonderQuery } from "@ponder/react";
 import { eq } from "@ponder/client";
-import { eventCreatePool } from "@/ponder/ponder.schema";
+import { agent } from "@/ponder/ponder.schema";
 export default function CreateAgentPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -85,8 +85,8 @@ export default function CreateAgentPage() {
     queryFn: (db) =>
       db
         .select()
-        .from(eventCreatePool)
-        .where(eq(eventCreatePool.txHash, txHash || "")),
+        .from(agent)
+        .where(eq(agent.txHash, txHash || "")),
   });
 
   useEffect(() => {

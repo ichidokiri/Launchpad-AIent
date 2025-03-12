@@ -12,8 +12,7 @@ const networks = {
   [monadTestnet.id]: {
     chainId: monadTestnet.id,
     transport: http(process.env[`PONDER_RPC_URL_${monadTestnet.id}`]),
-    pollingInterval: 10000,
-    maxRequestsPerSecond: 1,
+    pollingInterval: 5000,
   },
 } as const satisfies Record<number, NetworkConfig>;
 
@@ -31,6 +30,7 @@ export default createConfig({
         [monadTestnet.id]: {
           address: agentManagerAddress[monadTestnet.id],
           startBlock: 7443000,
+          endBlock: 7445000,
         },
         // [sepolia.id]: {
         //   address: agentManagerAddress[sepolia.id],

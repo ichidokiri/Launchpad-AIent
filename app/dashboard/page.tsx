@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import {
   Home,
   Settings,
@@ -36,29 +36,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { usePonderQuery } from "@ponder/react";
-import { EventCreatePool, eventCreatePool } from "@/ponder/ponder.schema";
+import { agent, Agent } from "@/ponder/ponder.schema";
 import { eq } from "@ponder/client";
 import { useAccount } from "wagmi";
-import { formatEther } from "viem";
-
-// Type definition here to avoid conflicts
-interface Agent {
-  id: string;
-  name: string;
-  symbol: string;
-  logo?: string;
-  price: string | number;
-  marketCap: number | string;
-  createdAt: string;
-  creator?: {
-    id: string;
-    name?: string;
-    email: string;
-  };
-}
+import { calculateMarketCap, calculatePrice } from "@/lib/utils";
 
 export default function DashboardPage() {
-  // const [agents, setAgents] = useState<Agent[]>([])
   const [dbStatus, setDbStatus] = useState<any>(null);
   const [isCheckingDb, setIsCheckingDb] = useState(false);
   const { user } = useAuth();
@@ -68,11 +51,10 @@ export default function DashboardPage() {
     queryFn: (db) =>
       db
         .select()
-        .from(eventCreatePool)
-        .where(eq(eventCreatePool.userAddress, userAddress || "")),
+        .from(agent as any)
+        .where(eq(agent.userAddress as any, userAddress || "")),
   });
-  const agentPrice = "0.00";
-  const agents = agentQuery.data as EventCreatePool[];
+  const agents = agentQuery.data as Agent[];
   const isLoading = agentQuery.isLoading;
   // Navigation items for the sidebar - show admin items only for admin users
   const navItems = [
@@ -495,7 +477,9 @@ export default function DashboardPage() {
                       <div className="mt-4 grid grid-cols-3 gap-4">
                         <div className="space-y-1">
                           <p className="text-sm text-gray-300">Price</p>
-                          <p className="font-medium text-white">{agentPrice}</p>
+                          <p className="font-medium text-white">
+                            {calculatePrice({ ...agent })}
+                          </p>
                         </div>
                         <div className="space-y-1">
                           <p className="text-sm text-gray-300">Created</p>
@@ -510,8 +494,7 @@ export default function DashboardPage() {
                         <div className="space-y-1">
                           <p className="text-sm text-gray-300">Market Cap</p>
                           <p className="font-medium text-white">
-                            {/* {formatNumber(agent.virtualTokenReserves, "$")} */}
-                            {formatEther(agent.virtualTokenReserves)}
+                            {calculateMarketCap({ ...agent })}
                           </p>
                         </div>
                       </div>
