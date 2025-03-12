@@ -1,84 +1,93 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-import Link from "next/link"
-import { Eye, EyeOff, Loader2 } from "lucide-react"
-import { signupUser } from "@/app/actions"
-import { toast } from "react-hot-toast"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Web3Login } from "@/components/web3-login"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { signupUser } from "@/app/actions";
+import { toast } from "react-hot-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+/**
+ *  ! DEPRECATED */
+// import { Web3Login } from "@/components/web3-login"
 
 export default function RegisterPage() {
-  const router = useRouter()
+  const router = useRouter();
 
   // Form state
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // Client-side validation
     if (!name.trim()) {
-      toast.error("Name is required")
-      return
+      toast.error("Name is required");
+      return;
     }
 
     if (!email.trim()) {
-      toast.error("Email is required")
-      return
+      toast.error("Email is required");
+      return;
     }
 
     if (!password.trim()) {
-      toast.error("Password is required")
-      return
+      toast.error("Password is required");
+      return;
     }
 
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match")
-      return
+      toast.error("Passwords do not match");
+      return;
     }
 
     if (password.length < 8) {
-      toast.error("Password must be at least 8 characters long")
-      return
+      toast.error("Password must be at least 8 characters long");
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      const result = await signupUser({ name, email, password })
+      const result = await signupUser({ name, email, password });
 
       if (result.success) {
-        toast.success(result.message || "Registration successful!")
+        toast.success(result.message || "Registration successful!");
         // Add a small delay before redirecting
         setTimeout(() => {
-          router.push("/login")
-        }, 2000)
+          router.push("/login");
+        }, 2000);
       } else {
         // Show error message from server
-        toast.error(result.message || "Registration failed")
+        toast.error(result.message || "Registration failed");
       }
     } catch (error) {
-      console.error("Registration error:", error)
-      toast.error("An unexpected error occurred. Please try again.")
+      console.error("Registration error:", error);
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-black">
@@ -96,7 +105,9 @@ export default function RegisterPage() {
                 />
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold text-white">Create an Account</CardTitle>
+            <CardTitle className="text-2xl font-bold text-white">
+              Create an Account
+            </CardTitle>
             <CardDescription className="text-gray-400">
               Enter your details to register for TradeGPT Launchpad
             </CardDescription>
@@ -136,7 +147,11 @@ export default function RegisterPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
 
@@ -153,11 +168,19 @@ export default function RegisterPage() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
                 >
-                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
 
-              <Button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              >
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -179,7 +202,8 @@ export default function RegisterPage() {
                 </p>
 
                 <div className="flex items-center justify-center gap-4 mt-4">
-                  <Web3Login />
+                  {/* <Web3Login /> */}
+                  <ConnectButton />
                 </div>
               </div>
             </form>
@@ -200,6 +224,5 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

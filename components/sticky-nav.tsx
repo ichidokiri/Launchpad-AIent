@@ -1,19 +1,21 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { useAuth } from "@/app/context/AuthContext"
-import { ThemeToggle } from "./theme-toggle"
-import { Wallet } from "lucide-react"
-
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/app/context/AuthContext";
+import { ThemeToggle } from "./theme-toggle";
+import { Wallet } from "lucide-react";
+import { useConnectModal, useAccountModal } from "@rainbow-me/rainbowkit";
+import { useAccount } from "wagmi";
 export function StickyNav() {
-  const pathname = usePathname()
-  const { user, logout } = useAuth()
-  const [isWalletConnected, setIsWalletConnected] = useState(false)
-  const [walletAddress, setWalletAddress] = useState("")
-
+  const pathname = usePathname();
+  const { user, logout } = useAuth();
+  const { openConnectModal } = useConnectModal();
+  const { openAccountModal } = useAccountModal();
+  const { address: walletAddress, isConnected: isWalletConnected } =
+    useAccount();
   const navItems = [
     { name: "Market", href: "/" },
     { name: "Create", href: "/create" },
@@ -21,28 +23,12 @@ export function StickyNav() {
     { name: "TradeGPT", href: "/tradegpt" },
     { name: "DataInfo", href: "/datainfo" },
     { name: "Livestream", href: "/livestream" },
-  ]
+  ];
 
   const truncateAddress = (address: string) => {
-    if (!address) return ""
-    return `${address.slice(0, 4)}...${address.slice(-4)}`
-  }
-
-  const handleConnectWallet = async () => {
-    if (typeof window.ethereum !== "undefined") {
-      try {
-        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" })
-        if (accounts && accounts.length > 0) {
-          setWalletAddress(accounts[0])
-          setIsWalletConnected(true)
-        }
-      } catch (error) {
-        console.error("User denied account access")
-      }
-    } else {
-      console.log("Please install MetaMask!")
-    }
-  }
+    if (!address) return "";
+    return `${address.slice(0, 4)}...${address.slice(-4)}`;
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-black border-b border-gray-800">
@@ -70,28 +56,45 @@ export function StickyNav() {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleConnectWallet}
+              onClick={() => {
+                console.log("clicked");
+                if (isWalletConnected) {
+                  openAccountModal?.();
+                } else {
+                  openConnectModal?.();
+                }
+              }}
               className="hidden sm:inline-flex bg-[#2F2F2F] border-gray-700 text-white hover:bg-gray-600"
             >
               <Wallet className="mr-2 h-4 w-4" />
-              {isWalletConnected ? truncateAddress(walletAddress) : "Connect Wallet"}
+              {isWalletConnected && walletAddress
+                ? truncateAddress(walletAddress)
+                : "Connect Wallet"}
             </Button>
             {!user ? (
               <>
                 <Link href="/login">
-                  <Button variant="ghost" className="text-base font-semibold text-white hover:bg-gray-800">
+                  <Button
+                    variant="ghost"
+                    className="text-base font-semibold text-white hover:bg-gray-800"
+                  >
                     Login
                   </Button>
                 </Link>
                 <Link href="/register">
-                  <Button variant="ghost" className="text-base font-semibold text-white hover:bg-gray-800">
+                  <Button
+                    variant="ghost"
+                    className="text-base font-semibold text-white hover:bg-gray-800"
+                  >
                     Register
                   </Button>
                 </Link>
               </>
             ) : (
               <>
-                <span className="text-sm font-semibold text-gray-300">{user.email}</span>
+                <span className="text-sm font-semibold text-gray-300">
+                  {user.email}
+                </span>
                 <Button
                   variant="ghost"
                   className="text-sm font-semibold text-white hover:bg-gray-800"
@@ -106,6 +109,5 @@ export function StickyNav() {
         </div>
       </div>
     </nav>
-  )
+  );
 }
-
