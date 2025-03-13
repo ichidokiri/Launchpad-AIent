@@ -13,9 +13,12 @@ import Image from "next/image";
 import { Upload, Loader2, Code, FileText } from "lucide-react";
 import { Ethereum } from "@/components/icons/ethereum";
 import toast from "react-hot-toast";
-import { useQuery } from "@tanstack/react-query";
-import { getAgentCreateDataQueryOptions } from "@/app/create/queries";
-import { useWriteAgentFactoryDeployErc20Token } from "@/ponder/generated";
+
+import {
+  useReadAgentFactoryInitialAmount,
+  useReadAgentManagerGetCreateFee,
+  useWriteAgentFactoryDeployErc20Token,
+} from "@/generated";
 import { usePonderQuery } from "@ponder/react";
 import { eq } from "@ponder/client";
 import { agent } from "@/ponder/ponder.schema";
@@ -38,7 +41,9 @@ export default function CreateAgentPage() {
   const [isUploading, setIsUploading] = useState(false);
 
   // fetch the create fee and initial amount
-  const { data: agentCreateData } = useQuery(getAgentCreateDataQueryOptions);
+
+  const { data: createFee } = useReadAgentManagerGetCreateFee();
+  const { data: initialAmount } = useReadAgentFactoryInitialAmount();
 
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -103,7 +108,7 @@ export default function CreateAgentPage() {
     }
     deployAgent({
       args: [name, symbol, description, avatar || "", socialLinks],
-      value: agentCreateData?.createFee,
+      value: createFee,
     });
   };
 
@@ -226,11 +231,7 @@ export default function CreateAgentPage() {
                       type="number"
                       step="0.01"
                       readOnly
-                      value={
-                        agentCreateData?.createFee
-                          ? formatEther(agentCreateData?.createFee)
-                          : ""
-                      }
+                      value={createFee ? formatEther(createFee) : ""}
                       className="w-full bg-card border border-border rounded-md p-2 pl-7 text-sm"
                       placeholder="0.00"
                     />
@@ -246,11 +247,7 @@ export default function CreateAgentPage() {
                     </span>
                     <input
                       type="number"
-                      value={
-                        agentCreateData?.initialAmount
-                          ? formatEther(agentCreateData?.initialAmount)
-                          : ""
-                      }
+                      value={initialAmount ? formatEther(initialAmount) : ""}
                       readOnly
                       className="w-full bg-card border border-border rounded-md p-2 pl-7 text-sm"
                       placeholder="0"
@@ -457,9 +454,7 @@ export default function CreateAgentPage() {
                   Issue Price:
                 </span>
                 <span className="text-sm text-card-foreground">
-                  {agentCreateData?.createFee
-                    ? formatEther(agentCreateData?.createFee)
-                    : "0.00"}
+                  {createFee ? formatEther(createFee) : "0.00"}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -467,9 +462,7 @@ export default function CreateAgentPage() {
                   Token Amount:
                 </span>
                 <span className="text-sm text-card-foreground">
-                  {agentCreateData?.initialAmount
-                    ? formatEther(agentCreateData?.initialAmount)
-                    : "0"}
+                  {initialAmount ? formatEther(initialAmount) : "0"}
                 </span>
               </div>
             </div>

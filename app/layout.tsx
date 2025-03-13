@@ -24,9 +24,9 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-background text-foreground antialiased">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <AuthProvider>
-            <Providers>
+        <Providers>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+            <AuthProvider>
               <TooltipProvider delayDuration={0}>
                 <Background>
                   <div className="relative min-h-screen flex flex-col">
@@ -35,9 +35,9 @@ export default function RootLayout({
                   </div>
                 </Background>
               </TooltipProvider>
-            </Providers>
-          </AuthProvider>
-        </ThemeProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </Providers>
         <Toaster
           position="top-center"
           toastOptions={{

@@ -1,5 +1,5 @@
-import type { ReactNode } from "react"
-import { SiteHeader } from "@/components/site-header"
+import type { ReactNode } from "react";
+import { SiteHeader } from "@/components/site-header";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
@@ -7,6 +7,5 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       <SiteHeader />
       <main>{children}</main>
     </>
-  )
+  );
 }
-

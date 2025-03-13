@@ -1,16 +1,9 @@
+"use client";
 import SelectionPanel from "@/components/selection-panel";
 import CreateAgentPage from "@/components/create-agent-page";
 import ChatInterface from "@/components/chat-interface";
 import { Toaster } from "react-hot-toast";
-
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { getQueryClient } from "@/lib/utils";
-import { getAgentCreateDataQueryOptions } from "./queries";
-export const dynamic = "force-dynamic";
-export default async function CreatePage() {
-  const queryClient = getQueryClient();
-  await queryClient.prefetchQuery(getAgentCreateDataQueryOptions);
-
+export default function CreatePage() {
   return (
     <div className="relative home-background">
       <div className="relative z-10">
@@ -35,9 +28,8 @@ export default async function CreatePage() {
                 AI Configuration
               </h2>
               {/* AI configuration content */}
-              <HydrationBoundary state={dehydrate(queryClient)}>
-                <CreateAgentPage />
-              </HydrationBoundary>
+
+              <CreateAgentPage />
             </div>
 
             {/* Preview Section */}
