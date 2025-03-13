@@ -89,7 +89,7 @@ export default function LoginPage() {
               className="object-contain dark:invert"
             />
           </div>
-          <h1 className="text-2xl font-light mt-4 mb-8 text-white">Welcome to AIent 👋</h1>
+          <h1 className="text-2xl font-light mt-4 mb-8 text-white">Welcome to AIent ✨</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">

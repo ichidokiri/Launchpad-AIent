@@ -29,9 +29,9 @@ export default createConfig({
       network: {
         [monadTestnet.id]: {
           address: agentManagerAddress[monadTestnet.id],
-          startBlock: 7513000,
+          // startBlock: 7513000,
           // endBlock: 7445000,
-          // startBlock: "latest",
+          startBlock: "latest",
         },
         // [sepolia.id]: {
         //   address: agentManagerAddress[sepolia.id],
