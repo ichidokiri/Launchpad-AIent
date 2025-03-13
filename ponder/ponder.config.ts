@@ -1,4 +1,4 @@
-import { createConfig, NetworkConfig } from "ponder";
+import { createConfig, NetworkConfig, rateLimit } from "ponder";
 import { http } from "viem";
 
 const agentManagerAddress = {
@@ -406,7 +406,12 @@ const networks = {
   },
   [monadTestnet.id]: {
     chainId: monadTestnet.id,
-    transport: http(process.env[`PONDER_RPC_URL_${monadTestnet.id}`]),
+    transport: rateLimit(
+      http(process.env[`PONDER_RPC_URL_${monadTestnet.id}`]),
+      {
+        requestsPerSecond: 10,
+      }
+    ),
     pollingInterval: 5000,
   },
 } as const satisfies Record<number, NetworkConfig>;
