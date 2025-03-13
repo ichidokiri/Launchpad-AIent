@@ -286,7 +286,7 @@ npx prisma generate
 - Create notification preferences for users
 - Add price alerts and transaction notifications
 
-## 4. Improve the TradeGPT AI Assistant
+### 4. Improve the TradeGPT AI Assistant
 
 - Connect it to real-time market data
 - Allow it to analyze specific tokens or agents
