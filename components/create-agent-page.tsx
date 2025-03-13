@@ -85,8 +85,8 @@ export default function CreateAgentPage() {
     queryFn: (db) =>
       db
         .select()
-        .from(agent)
-        .where(eq(agent.txHash, txHash || "")),
+        .from(agent as any)
+        .where(eq(agent.txHash as any, txHash || "")),
   });
 
   useEffect(() => {

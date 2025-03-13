@@ -1,25 +1,27 @@
-"use server"
+"use server";
 
-import { cookies } from "next/headers"
-import { signToken } from "@/lib/jwt"
-import { prisma } from "@/lib/db"
-import { sendVerificationEmail } from "@/lib/email"
-import type { TokenPayload } from "@/types/auth"
-import { hash, compare } from "bcryptjs"
-import { z } from "zod"
+import { cookies } from "next/headers";
+import { signToken } from "@/lib/jwt";
+import { db } from "@/lib/db";
+import { sendVerificationEmail } from "@/lib/email";
+import type { TokenPayload } from "@/types/auth";
+import { hash, compare } from "bcryptjs";
+import { z } from "zod";
+import { users, verificationCodes } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 /**
  * Zod schema to validate email addresses
  */
 const emailSchema = z.object({
   email: z.string().email(),
-})
+});
 
 /**
  * Generate a 4-digit verification code
  */
 function generateVerificationCode(): string {
-  return Math.floor(1000 + Math.random() * 9000).toString()
+  return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
 /**
@@ -27,78 +29,91 @@ function generateVerificationCode(): string {
  */
 export async function loginUser(email: string, password: string) {
   try {
-    const user = await prisma.user.findUnique({ where: { email } })
+    const user = await db.query.users.findFirst({
+      where: (user, { eq }) => eq(user.email, email),
+    });
     if (!user) {
-      return { success: false, message: "User not found. Please register first." }
+      return {
+        success: false,
+        message: "User not found. Please register first.",
+      };
     }
 
-    const isValidPassword = await compare(password, user.password)
+    const isValidPassword = await compare(password, user.password);
     if (!isValidPassword) {
-      return { success: false, message: "Invalid credentials" }
+      return { success: false, message: "Invalid credentials" };
     }
 
     const tokenPayload: TokenPayload = {
       id: user.id.toString(),
       email: user.email,
       role: user.role === "USER" ? "user" : "admin",
-    }
+    };
 
-    const authToken = await signToken(tokenPayload)
+    const authToken = await signToken(tokenPayload);
     if (authToken) {
       // Use await with cookies()
-      const cookieStore = await cookies()
+      const cookieStore = await cookies();
       cookieStore.set("authToken", authToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60, // 7 days
         path: "/",
-      })
+      });
 
-      return { success: true, user: tokenPayload }
+      return { success: true, user: tokenPayload };
     }
 
-    return { success: false, message: "Authentication failed" }
+    return { success: false, message: "Authentication failed" };
   } catch (error) {
-    console.error("Login error:", error)
-    return { success: false, message: "An unexpected error occurred" }
+    console.error("Login error:", error);
+    return { success: false, message: "An unexpected error occurred" };
   }
 }
 
 /**
  * Registers a new user
  */
-export async function signupUser(formData: { email: string; password: string; name?: string }) {
+export async function signupUser(formData: {
+  email: string;
+  password: string;
+  name?: string;
+}) {
   try {
     if (!formData.email || !formData.password) {
-      return { success: false, message: "All fields are required" }
+      return { success: false, message: "All fields are required" };
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      return { success: false, message: "Invalid email format" }
+      return { success: false, message: "Invalid email format" };
     }
 
     if (formData.password.length < 8) {
-      return { success: false, message: "Password must be at least 8 characters long" }
+      return {
+        success: false,
+        message: "Password must be at least 8 characters long",
+      };
     }
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email: formData.email },
-    })
+    const existingUser = await db.query.users.findFirst({
+      where: (user, { eq }) => eq(user.email, formData.email),
+    });
     if (existingUser) {
-      return { success: false, message: "User with this email already exists" }
+      return { success: false, message: "User with this email already exists" };
     }
 
-    const hashedPassword = await hash(formData.password, 10)
-    const user = await prisma.user.create({
-      data: {
+    const hashedPassword = await hash(formData.password, 10);
+    const [user] = await db
+      .insert(users)
+      .values({
         email: formData.email,
         password: hashedPassword,
         name: formData.name || null,
         role: "USER",
-      },
-    })
+      })
+      .returning();
 
     return {
       success: true,
@@ -108,13 +123,13 @@ export async function signupUser(formData: { email: string; password: string; na
         email: user.email,
         role: user.role,
       },
-    }
+    };
   } catch (error) {
-    console.error("Signup error:", error)
+    console.error("Signup error:", error);
     return {
       success: false,
       message: "Registration failed. Please try again.",
-    }
+    };
   }
 }
 
@@ -124,39 +139,40 @@ export async function signupUser(formData: { email: string; password: string; na
 export async function forgotPassword(email: string) {
   try {
     if (!email) {
-      return { success: false, message: "Email is required" }
+      return { success: false, message: "Email is required" };
     }
 
-    const user = await prisma.user.findUnique({ where: { email } })
+    const user = await db.query.users.findFirst({
+      where: (user, { eq }) => eq(user.email, email),
+    });
     // Hide whether the user exists
     if (!user) {
       return {
         success: true,
         message: "If your email is registered, you will receive a reset link.",
-      }
+      };
     }
 
-    const verificationCode = generateVerificationCode()
-    await prisma.verificationCode.create({
-      data: {
-        email,
-        code: verificationCode,
-        expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
-      },
-    })
+    const verificationCode = generateVerificationCode();
+    await db.insert(verificationCodes).values({
+      userId: user.id,
+      email,
+      code: verificationCode,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+    });
 
-    await sendVerificationEmail(email, verificationCode)
+    await sendVerificationEmail(email, verificationCode);
     return {
       success: true,
       status: "Success",
       message: "Verification code sent successfully",
-    }
+    };
   } catch (error) {
-    console.error("Forgot password error:", error)
+    console.error("Forgot password error:", error);
     return {
       success: false,
       message: error instanceof Error ? error.message : "An error occurred",
-    }
+    };
   }
 }
 
@@ -166,34 +182,37 @@ export async function forgotPassword(email: string) {
 export async function verifyOTP(email: string, code: string) {
   try {
     if (!email || !code) {
-      return { success: false, message: "Email and OTP are required" }
+      return { success: false, message: "Email and OTP are required" };
     }
 
-    const verificationRecord = await prisma.verificationCode.findFirst({
-      where: {
-        email,
-        code,
-        expiresAt: { gt: new Date() },
-        used: false,
-      },
-    })
+    const verificationRecord = await db.query.verificationCodes.findFirst({
+      where: (verificationCode, { eq, and, gt }) =>
+        and(
+          eq(verificationCode.email, email),
+          eq(verificationCode.code, code),
+          gt(verificationCode.expiresAt, new Date())
+        ),
+    });
 
     if (!verificationRecord) {
-      return { success: false, message: "Invalid or expired verification code" }
+      return {
+        success: false,
+        message: "Invalid or expired verification code",
+      };
     }
 
-    await prisma.verificationCode.update({
-      where: { id: verificationRecord.id },
-      data: { used: true },
-    })
+    await db
+      .update(verificationCodes)
+      .set({ used: true })
+      .where(eq(verificationCodes.id, verificationRecord.id));
 
-    return { success: true, message: "Email verified successfully" }
+    return { success: true, message: "Email verified successfully" };
   } catch (error) {
-    console.error("Verification error:", error)
+    console.error("Verification error:", error);
     return {
       success: false,
       message: "An error occurred during verification",
-    }
+    };
   }
 }
 
@@ -203,33 +222,42 @@ export async function verifyOTP(email: string, code: string) {
 export async function resendOTP(email: string) {
   try {
     if (!email) {
-      return { success: false, message: "Email is required" }
+      return { success: false, message: "Email is required" };
     }
 
-    const verificationCode = generateVerificationCode()
-    await prisma.verificationCode.create({
-      data: {
-        email,
-        code: verificationCode,
-        expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-      },
-    })
+    const user = await db.query.users.findFirst({
+      where: (user, { eq }) => eq(user.email, email),
+    });
+    if (!user) {
+      return { success: false, message: "User not found" };
+    }
 
-    const emailSent = await sendVerificationEmail(email, verificationCode)
+    const verificationCode = generateVerificationCode();
+    await db.insert(verificationCodes).values({
+      email,
+      code: verificationCode,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+      userId: user.id,
+    });
+
+    const emailSent = await sendVerificationEmail(email, verificationCode);
     if (!emailSent) {
-      throw new Error("Failed to send verification email")
+      throw new Error("Failed to send verification email");
     }
 
     return {
       success: true,
       message: "Verification code sent successfully",
-    }
+    };
   } catch (error) {
-    console.error("Resend OTP error:", error)
+    console.error("Resend OTP error:", error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Failed to resend verification code",
-    }
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to resend verification code",
+    };
   }
 }
 
@@ -238,42 +266,45 @@ export async function resendOTP(email: string) {
  */
 export async function resendVerificationCode(email: string) {
   try {
-    const validatedFields = emailSchema.safeParse({ email })
+    const validatedFields = emailSchema.safeParse({ email });
     if (!validatedFields.success) {
-      return { error: "Invalid email address" }
+      return { error: "Invalid email address" };
     }
 
-    const user = await prisma.user.findUnique({ where: { email } })
+    const user = await db.query.users.findFirst({
+      where: (user, { eq }) => eq(user.email, email),
+    });
     if (!user) {
-      return { error: "User not found" }
+      return { error: "User not found" };
     }
 
     // If user is already verified
     if (user.status === "VERIFIED") {
-      return { error: "User is already verified" }
+      return { error: "User is already verified" };
     }
 
     // Delete any old codes
-    await prisma.verificationCode.deleteMany({ where: { email } })
+    await db
+      .delete(verificationCodes)
+      .where(eq(verificationCodes.email, email));
 
-    const verificationCode = generateVerificationCode()
-    await prisma.verificationCode.create({
-      data: {
-        code: verificationCode,
-        email,
-        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
-      },
-    })
+    const verificationCode = generateVerificationCode();
+    await db.insert(verificationCodes).values({
+      code: verificationCode,
+      email,
+      expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+      userId: user.id,
+    });
 
-    const emailSent = await sendVerificationEmail(email, verificationCode)
+    const emailSent = await sendVerificationEmail(email, verificationCode);
     if (!emailSent) {
-      throw new Error("Failed to send verification email")
+      throw new Error("Failed to send verification email");
     }
 
-    return { success: true }
+    return { success: true };
   } catch (error) {
-    console.error("Error resending verification code:", error)
-    return { error: "Failed to resend verification code" }
+    console.error("Error resending verification code:", error);
+    return { error: "Failed to resend verification code" };
   }
 }
 
@@ -283,30 +314,38 @@ export async function resendVerificationCode(email: string) {
 export async function resetPassword(email: string, password: string) {
   try {
     if (!email || !password) {
-      return { success: false, message: "Email and password are required" }
+      return { success: false, message: "Email and password are required" };
     }
     if (password.length < 8) {
-      return { success: false, message: "Password must be at least 8 characters long" }
+      return {
+        success: false,
+        message: "Password must be at least 8 characters long",
+      };
     }
 
-    const user = await prisma.user.findUnique({ where: { email } })
+    const user = await db.query.users.findFirst({
+      where: (user, { eq }) => eq(user.email, email),
+    });
     if (!user) {
-      return { success: false, message: "User not found" }
+      return { success: false, message: "User not found" };
     }
 
-    const hashedPassword = await hash(password, 10)
-    await prisma.user.update({
-      where: { email },
-      data: { password: hashedPassword },
-    })
+    const hashedPassword = await hash(password, 10);
+    await db
+      .update(users)
+      .set({ password: hashedPassword })
+      .where(eq(users.email, email));
 
-    return { success: true, message: "Password reset successfully" }
+    return { success: true, message: "Password reset successfully" };
   } catch (error) {
-    console.error("Password reset error:", error)
+    console.error("Password reset error:", error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : "An error occurred during password reset",
-    }
+      message:
+        error instanceof Error
+          ? error.message
+          : "An error occurred during password reset",
+    };
   }
 }
 
@@ -315,10 +354,10 @@ export async function resetPassword(email: string, password: string) {
  */
 export async function refreshAuthToken() {
   try {
-    const cookieStore = await cookies()
-    const authToken = cookieStore.get("authToken")?.value
+    const cookieStore = await cookies();
+    const authToken = cookieStore.get("authToken")?.value;
     if (!authToken) {
-      return { success: false, message: "No auth token available" }
+      return { success: false, message: "No auth token available" };
     }
 
     // Example: create a new token
@@ -326,9 +365,9 @@ export async function refreshAuthToken() {
       id: "1",
       email: "demo@example.com",
       role: "user",
-    }
+    };
 
-    const newAuthToken = await signToken(mockUserData)
+    const newAuthToken = await signToken(mockUserData);
     if (newAuthToken) {
       cookieStore.set("authToken", newAuthToken, {
         httpOnly: true,
@@ -336,17 +375,17 @@ export async function refreshAuthToken() {
         sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60,
         path: "/",
-      })
-      return { success: true, userData: mockUserData }
+      });
+      return { success: true, userData: mockUserData };
     }
 
-    return { success: false, message: "Failed to generate new token" }
+    return { success: false, message: "Failed to generate new token" };
   } catch (error) {
-    console.error("Token refresh error:", error)
+    console.error("Token refresh error:", error);
     return {
       success: false,
       message: error instanceof Error ? error.message : "Token refresh failed",
-    }
+    };
   }
 }
 
@@ -355,12 +394,11 @@ export async function refreshAuthToken() {
  */
 export async function logout() {
   try {
-    const cookieStore = await cookies()
-    cookieStore.delete("authToken")
-    return { success: true }
+    const cookieStore = await cookies();
+    cookieStore.delete("authToken");
+    return { success: true };
   } catch (error) {
-    console.error("Logout error:", error)
-    return { success: false }
+    console.error("Logout error:", error);
+    return { success: false };
   }
 }
-
