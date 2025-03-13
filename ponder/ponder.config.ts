@@ -412,7 +412,6 @@ const networks = {
         requestsPerSecond: 10,
       }
     ),
-    pollingInterval: 5000,
   },
 } as const satisfies Record<number, NetworkConfig>;
 
@@ -422,16 +421,15 @@ export default createConfig({
     kind: "postgres",
     connectionString: process.env.PONDER_DATABASE_URL,
   },
-
   contracts: {
     agentManager: {
       abi: agentManagerAbi,
       network: {
         [monadTestnet.id]: {
           address: agentManagerAddress[monadTestnet.id],
-          // startBlock: 7513000,
+          startBlock: 7441535,
           // endBlock: 7445000,
-          startBlock: "latest",
+          // startBlock: "latest",
         },
         // [sepolia.id]: {
         //   address: agentManagerAddress[sepolia.id],

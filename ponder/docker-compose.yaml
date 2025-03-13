@@ -23,7 +23,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: npm run start
+    command: /app/init-db.sh
     environment:
       PONDER_DATABASE_URL: ${DATABASE_URL}
       PONDER_RPC_URL_10143: ${PONDER_RPC_URL_10143}

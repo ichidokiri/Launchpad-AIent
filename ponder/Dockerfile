@@ -12,6 +12,9 @@ RUN npm install
 FROM base AS runtime
 COPY --from=dependencies /app/node_modules ./node_modules
 
+# Install PostgreSQL client
+RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
+
 COPY . .
 RUN npx ponder codegen
 
