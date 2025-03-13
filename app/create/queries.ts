@@ -1,6 +1,6 @@
-import { readAgentFactoryInitialAmount } from "@/generated";
+import { readAgentFactoryInitialAmount } from "@/ponder/generated";
 
-import { readAgentManagerGetCreateFee } from "@/generated";
+import { readAgentManagerGetCreateFee } from "@/ponder/generated";
 import { getWagmiConfig } from "@/lib/web3";
 async function getAgentCreateData() {
   const config = getWagmiConfig();

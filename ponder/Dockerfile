@@ -1,15 +1,19 @@
-FROM node:18-alpine
-
+# Base Image
+FROM node:18.17.0-bullseye-slim AS base
 WORKDIR /app
+COPY package.json .
+COPY package-lock.json .
 
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+# Dependencies
+FROM base AS dependencies
+RUN apt-get update && apt-get install -y python3 build-essential
+RUN npm install 
+# Runtime
+FROM base AS runtime
+COPY --from=dependencies /app/node_modules ./node_modules
 
 COPY . .
-
-RUN npm run codegen
-RUN npm run build
+RUN npx ponder codegen
 
 EXPOSE 42069
-
-CMD ["npm", "run", "start"]
+CMD ["npx","ponder","start"]

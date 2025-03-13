@@ -14,15 +14,19 @@
   "dependencies": {
     "hono": "^4.5.0",
     "ponder": "0.9.27",
-    "viem": "^2.21.3"
+    "viem": "^2.21.3",
+    "wagmi": "^2.14.13"
   },
   "devDependencies": {
-    "eslint-config-ponder": "0.9.27",
     "@types/node": "^20.10.0",
     "eslint": "^8.54.0",
+    "eslint-config-ponder": "0.9.27",
     "typescript": "^5.7.0"
   },
   "engines": {
     "node": ">=18.14"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-arm64-gnu": "*"
   }
 }

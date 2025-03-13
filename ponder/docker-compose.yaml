@@ -1,5 +1,6 @@
 services:
   db:
+    container_name: ponder-db
     image: postgres:15-alpine
     ports:
       - "5435:5432"
@@ -18,12 +19,18 @@ services:
       retries: 5
 
   ponder:
-    build: ./
+    container_name: ponder-app
+    build:
+      context: .
+      dockerfile: Dockerfile
     command: npm run start
     environment:
-      PONDER_DATABASE_URL: postgresql://ponder:ponder_password@db:5435/ponder_prod
+      PONDER_DATABASE_URL: ${DATABASE_URL}
       PONDER_RPC_URL_10143: ${PONDER_RPC_URL_10143}
+      DATABASE_SCHEMA: ${DATABASE_SCHEMA:-ponder}
       NODE_ENV: production
+      PONDER_TELEMETRY_DISABLED: true
+
     depends_on:
       db:
         condition: service_healthy
@@ -32,7 +39,8 @@ services:
     networks:
       - ponder-network
     volumes:
-      - ./ponder:/app
+      - ./:/app
+      - node_modules:/app/node_modules
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:42069/ready"]
       interval: 10s
@@ -42,6 +50,6 @@ services:
 
 volumes:
   postgres_data:
-
+  node_modules:
 networks:
   ponder-network:

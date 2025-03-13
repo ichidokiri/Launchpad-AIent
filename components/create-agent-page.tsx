@@ -15,7 +15,7 @@ import { Ethereum } from "@/components/icons/ethereum";
 import toast from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 import { getAgentCreateDataQueryOptions } from "@/app/create/queries";
-import { useWriteAgentFactoryDeployErc20Token } from "@/generated";
+import { useWriteAgentFactoryDeployErc20Token } from "@/ponder/generated";
 import { usePonderQuery } from "@ponder/react";
 import { eq } from "@ponder/client";
 import { agent } from "@/ponder/ponder.schema";

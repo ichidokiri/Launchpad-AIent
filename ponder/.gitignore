@@ -16,3 +16,6 @@ yarn-error.log*
 # Ponder
 /generated/
 /.ponder/
+
+# npm, pnpm lock files
+pnpm-lock.yaml
