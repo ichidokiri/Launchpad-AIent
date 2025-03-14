@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db" // Use the singleton instance from lib/db.ts
 import { auth } from "@/lib/auth"
+import { getModelName } from "@/lib/db"
 
 export const dynamic = "force-dynamic"
 
@@ -71,11 +72,11 @@ export async function POST(request: NextRequest) {
       price: typeof body.price === "number" ? body.price : Number.parseFloat(body.price) || 0,
       symbol: body.symbol.toUpperCase(),
       marketCap:
-        typeof body.marketCap === "number"
-          ? body.marketCap
-          : typeof body.tokenAmount === "number"
-            ? body.price * body.tokenAmount
-            : 0,
+          typeof body.marketCap === "number"
+              ? body.marketCap
+              : typeof body.tokenAmount === "number"
+                  ? body.price * body.tokenAmount
+                  : 0,
       creatorId: userId,
       logo: body.avatar || null,
     }
@@ -86,7 +87,8 @@ export async function POST(request: NextRequest) {
     let agent
     try {
       // Use the correct model name (aIAgent)
-      agent = await prisma.aIAgent.create({
+      const agentModelName = getModelName("AIAgent")
+      agent = await (prisma as any)[agentModelName].create({
         data: agentData,
       })
       console.log("Created agent successfully:", JSON.stringify(agent, null, 2))
@@ -106,12 +108,12 @@ export async function POST(request: NextRequest) {
 
     // Provide detailed error information
     return NextResponse.json(
-      {
-        error: "Failed to create agent",
-        message: error instanceof Error ? error.message : String(error),
-        stack: process.env.NODE_ENV === "development" ? (error instanceof Error ? error.stack : undefined) : undefined,
-      },
-      { status: 500 },
+        {
+          error: "Failed to create agent",
+          message: error instanceof Error ? error.message : String(error),
+          stack: process.env.NODE_ENV === "development" ? (error instanceof Error ? error.stack : undefined) : undefined,
+        },
+        { status: 500 },
     )
   }
 }
@@ -149,18 +151,19 @@ export async function GET(request: NextRequest) {
     console.log("Prisma query:", JSON.stringify(query, null, 2))
 
     // Use the correct model name (aIAgent)
-    const agents = await prisma.aIAgent.findMany(query)
+    const agentModelName = getModelName("AIAgent")
+    const agents = await (prisma as any)[agentModelName].findMany(query)
     console.log("Found agents:", agents.length)
 
     return NextResponse.json({ agents })
   } catch (error) {
     console.error("Error fetching agents:", error)
     return NextResponse.json(
-      {
-        error: "Failed to fetch agents",
-        message: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 },
+        {
+          error: "Failed to fetch agents",
+          message: error instanceof Error ? error.message : String(error),
+        },
+        { status: 500 },
     )
   }
 }
