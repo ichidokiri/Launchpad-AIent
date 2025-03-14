@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String            @id @default(cuid())
+  username        String?           @unique
+  email           String            @unique
+  password        String
+  role            String            @default("USER") // USER, ADMIN, SUPERADMIN
+  status          String?           @default("active") // active, inactive, pending
+  monadBalance    Float?            @default(0)
+  image           String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  agents          AIAgent[]
+  verificationCodes VerificationCode[]
+  tokens          Token[]
+  interactions    Interaction[]
+}
+
+model AIAgent {
+  id              String            @id @default(cuid())
+  name            String
+  description     String?
+  model           String            @default("gpt-3.5-turbo")
+  systemPrompt    String?           @db.Text
+  category        String            @default("Other")
+  isPublic        Boolean           @default(false)
+  price           Float             @default(0)
+  creatorId       String
+  creator         User              @relation(fields: [creatorId], references: [id])
+  logo            String?
+  contractAddress String?
+  symbol          String
+  marketCap       Float             @default(0)
+  totalSupply     Float?
+  holders         Int?
+  verified        Boolean?          @default(false)
+  status          String?           @default("active") // active, pending, paused
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  purchases       Purchase[]
+  interactions    Interaction[]
+}
+
+model VerificationCode {
+  id              String            @id @default(cuid())
+  email           String
+  code            String
+  expiresAt       DateTime
+  used            Boolean           @default(false)
+  createdAt       DateTime          @default(now())
+  user            User?             @relation(fields: [email], references: [email])
+}
+
+model Token {
+  id              String            @id @default(cuid())
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token           String            @unique
+  type            String            // refresh, access, etc.
+  expiresAt       DateTime
+  createdAt       DateTime          @default(now())
+}
+
+model Purchase {
+  id              String            @id @default(cuid())
+  agentId         String
+  agent           AIAgent           @relation(fields: [agentId], references: [id])
+  userId          String
+  amount          Float
+  createdAt       DateTime          @default(now())
+}
+
+model Interaction {
+  id              String            @id @default(cuid())
+  userId          String
+  user            User              @relation(fields: [userId], references: [id])
+  agentId         String
+  agent           AIAgent           @relation(fields: [agentId], references: [id])
+  type            String            // chat, feedback, etc.
+  content         String?           @db.Text
+  rating          Int?
+  createdAt       DateTime          @default(now())
+}
+
