@@ -290,11 +290,11 @@ export default function AgentDataInfoPage() {
 
         // Cache agent details
         localStorage.setItem(
-            `agent-details-${agentId}`,
-            JSON.stringify({
-              symbol: data.agent.symbol,
-              name: data.agent.name,
-            }),
+          `agent-details-${agentId}`,
+          JSON.stringify({
+            symbol: data.agent.symbol,
+            name: data.agent.name,
+          }),
         )
 
         // Generate agent-specific articles
@@ -602,9 +602,9 @@ For investors, ${data.agent.symbol} represents a ${Math.random() > 0.5 ? "higher
 
   // Function to enhance content with OpenAI
   const enhanceWithOpenAI = async (
-      content: string,
-      agentName?: string | null,
-      agentSymbol?: string | null,
+    content: string,
+    agentName?: string | null,
+    agentSymbol?: string | null,
   ): Promise<string> => {
     try {
       const response = await fetch("/api/enhance-content", {
@@ -747,122 +747,122 @@ Market participants should remain vigilant of broader crypto market conditions w
 
   // Filter articles based on search term, selected topic, and agent symbol
   const filteredArticles = allArticles.filter(
-      (article) =>
-          article.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-          (selectedTopic === "" || article.topic === selectedTopic) &&
-          (!agentSymbol || !article.agentSymbol || article.agentSymbol === agentSymbol),
+    (article) =>
+      article.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (selectedTopic === "" || article.topic === selectedTopic) &&
+      (!agentSymbol || !article.agentSymbol || article.agentSymbol === agentSymbol),
   )
 
   const topics = ["analysis", "trading", "fundamentals", "data analysis"]
 
   return (
-      <div className="container mx-auto px-4 py-8 bg-black text-white">
-        <div className="flex items-center mb-6">
-          <Link href={`/market/${agentId}`} className="mr-4">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <h1 className="text-3xl font-bold">{agentName ? `${agentName} DataInfo` : "DataInfo"}</h1>
-        </div>
-
-        <div className="mb-6 flex flex-wrap gap-4 items-center justify-between">
-          <div className="flex flex-wrap gap-4">
-            <Input
-                type="text"
-                placeholder="Search articles..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-sm bg-[#2F2F2F] border-gray-700 text-white placeholder:text-gray-400"
-            />
-            <select
-                value={selectedTopic}
-                onChange={(e) => setSelectedTopic(e.target.value)}
-                className="border rounded p-2 bg-[#2F2F2F] border-gray-700 text-white"
-            >
-              <option value="">All Topics</option>
-              {topics.map((topic) => (
-                  <option key={topic} value={topic}>
-                    {topic}
-                  </option>
-              ))}
-            </select>
-          </div>
-
-          <Button onClick={generateNewArticle} disabled={isLoading} className="bg-blue-600 hover:bg-blue-700 text-white">
-            {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating Article...
-                </>
-            ) : (
-                <>
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Generate New Article
-                </>
-            )}
+    <div className="container mx-auto px-4 py-8 bg-black text-white">
+      <div className="flex items-center mb-6">
+        <Link href={`/market/${agentId}`} className="mr-4">
+          <Button variant="ghost" size="icon">
+            <ArrowLeft className="h-5 w-5" />
           </Button>
-        </div>
-
-        {generationError && (
-            <div className="mb-6 p-4 bg-red-900/50 border border-red-700 rounded-md">
-              <p className="text-red-200">{generationError}</p>
-            </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredArticles.length > 0 ? (
-              filteredArticles.map((article) => (
-                  <div key={article.id} onClick={() => handleArticleClick(article)} className="cursor-pointer">
-                    <Card className="bg-[#2F2F2F] border-gray-700 hover:bg-gray-700 transition-colors h-full">
-                      <CardHeader>
-                        <CardTitle className="text-white">{article.title}</CardTitle>
-                        {article.date && <p className="text-sm text-gray-400">Published: {article.date}</p>}
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-400">Topic: {article.topic}</p>
-                        <p className="mt-2 text-gray-300">{article.content.substring(0, 100)}...</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-              ))
-          ) : (
-              <div className="col-span-full text-center py-10">
-                <p className="text-lg text-gray-400">No articles found matching your criteria.</p>
-                <Button
-                    variant="outline"
-                    className="mt-4 bg-[#2F2F2F] border-gray-700 text-white hover:bg-gray-600"
-                    onClick={() => {
-                      setSearchTerm("")
-                      setSelectedTopic("")
-                    }}
-                >
-                  Clear Filters
-                </Button>
-              </div>
-          )}
-        </div>
-
-        {/* Article Dialog */}
-        <Dialog open={showArticleDialog} onOpenChange={setShowArticleDialog}>
-          <DialogContent className="bg-[#2F2F2F] text-white border-gray-700 max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-xl md:text-2xl">{(selectedArticle || newArticle)?.title}</DialogTitle>
-              {(selectedArticle || newArticle)?.date && (
-                  <p className="text-sm text-gray-400">Published: {(selectedArticle || newArticle)?.date}</p>
-              )}
-              {(selectedArticle || newArticle)?.topic && (
-                  <p className="text-sm text-gray-400">Topic: {(selectedArticle || newArticle)?.topic}</p>
-              )}
-            </DialogHeader>
-            <div className="mt-4">
-              <ReactMarkdown components={markdownComponents}>
-                {(selectedArticle || newArticle)?.content || ""}
-              </ReactMarkdown>
-            </div>
-          </DialogContent>
-        </Dialog>
+        </Link>
+        <h1 className="text-3xl font-bold">{agentName ? `${agentName} DataInfo` : "DataInfo"}</h1>
       </div>
+
+      <div className="mb-6 flex flex-wrap gap-4 items-center justify-between">
+        <div className="flex flex-wrap gap-4">
+          <Input
+            type="text"
+            placeholder="Search articles..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-sm bg-[#2F2F2F] border-gray-700 text-white placeholder:text-gray-400"
+          />
+          <select
+            value={selectedTopic}
+            onChange={(e) => setSelectedTopic(e.target.value)}
+            className="border rounded p-2 bg-[#2F2F2F] border-gray-700 text-white"
+          >
+            <option value="">All Topics</option>
+            {topics.map((topic) => (
+              <option key={topic} value={topic}>
+                {topic}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <Button onClick={generateNewArticle} disabled={isLoading} className="bg-blue-600 hover:bg-blue-700 text-white">
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Generating Article...
+            </>
+          ) : (
+            <>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Generate New Article
+            </>
+          )}
+        </Button>
+      </div>
+
+      {generationError && (
+        <div className="mb-6 p-4 bg-red-900/50 border border-red-700 rounded-md">
+          <p className="text-red-200">{generationError}</p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredArticles.length > 0 ? (
+          filteredArticles.map((article) => (
+            <div key={article.id} onClick={() => handleArticleClick(article)} className="cursor-pointer">
+              <Card className="bg-[#2F2F2F] border-gray-700 hover:bg-gray-700 transition-colors h-full">
+                <CardHeader>
+                  <CardTitle className="text-white">{article.title}</CardTitle>
+                  {article.date && <p className="text-sm text-gray-400">Published: {article.date}</p>}
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-400">Topic: {article.topic}</p>
+                  <p className="mt-2 text-gray-300">{article.content.substring(0, 100)}...</p>
+                </CardContent>
+              </Card>
+            </div>
+          ))
+        ) : (
+          <div className="col-span-full text-center py-10">
+            <p className="text-lg text-gray-400">No articles found matching your criteria.</p>
+            <Button
+              variant="outline"
+              className="mt-4 bg-[#2F2F2F] border-gray-700 text-white hover:bg-gray-600"
+              onClick={() => {
+                setSearchTerm("")
+                setSelectedTopic("")
+              }}
+            >
+              Clear Filters
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Article Dialog */}
+      <Dialog open={showArticleDialog} onOpenChange={setShowArticleDialog}>
+        <DialogContent className="bg-[#2F2F2F] text-white border-gray-700 max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl md:text-2xl">{(selectedArticle || newArticle)?.title}</DialogTitle>
+            {(selectedArticle || newArticle)?.date && (
+              <p className="text-sm text-gray-400">Published: {(selectedArticle || newArticle)?.date}</p>
+            )}
+            {(selectedArticle || newArticle)?.topic && (
+              <p className="text-sm text-gray-400">Topic: {(selectedArticle || newArticle)?.topic}</p>
+            )}
+          </DialogHeader>
+          <div className="mt-4">
+            <ReactMarkdown components={markdownComponents}>
+              {(selectedArticle || newArticle)?.content || ""}
+            </ReactMarkdown>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }
 

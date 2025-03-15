@@ -46,7 +46,8 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [dbStatus, setDbStatus] = useState<any>(null)
   const [isCheckingDb, setIsCheckingDb] = useState(false)
-  const { user } = useAuth()
+  // Import refreshUser from useAuth
+  const { user, refreshUser } = useAuth()
 
   // Navigation items for the sidebar - show admin items only for admin users
   const navItems = [
@@ -63,6 +64,7 @@ export default function DashboardPage() {
     { icon: HelpCircle, label: "Help", href: "/dashboard/help" },
   ]
 
+  // Update the fetchAgents function to be more robust
   const fetchAgents = useCallback(async () => {
     try {
       setIsLoading(true)
@@ -75,7 +77,7 @@ export default function DashboardPage() {
 
       // First try the dashboard user-agents endpoint
       try {
-        response = await fetch(`/api/dashboard/user-agents?t=${Date.now()}`, {
+        response = await fetch(`/api/dashboard/user-agents?t=${Date.now()}&userId=${user?.id}`, {
           headers: {
             "Cache-Control": "no-cache, no-store, must-revalidate",
             Pragma: "no-cache",
@@ -100,7 +102,7 @@ export default function DashboardPage() {
       // If no agents found, try the ai-agents endpoint
       if (!foundAgents) {
         try {
-          response = await fetch(`/api/ai-agents?t=${Date.now()}`, {
+          response = await fetch(`/api/ai-agents?t=${Date.now()}&creatorId=${user?.id}`, {
             headers: {
               "Cache-Control": "no-cache, no-store, must-revalidate",
               Pragma: "no-cache",
@@ -126,7 +128,7 @@ export default function DashboardPage() {
       // If still no agents found, try the agents endpoint
       if (!foundAgents) {
         try {
-          response = await fetch(`/api/agents?t=${Date.now()}`, {
+          response = await fetch(`/api/agents?t=${Date.now()}&creatorId=${user?.id}`, {
             headers: {
               "Cache-Control": "no-cache, no-store, must-revalidate",
               Pragma: "no-cache",
@@ -162,26 +164,35 @@ export default function DashboardPage() {
     }
   }, [user?.id, user?.email])
 
-  // Log user data and fetch agents when available
+  // Update the useEffect to depend on user and refreshUser
+  // Add refreshUser to the dependencies
   useEffect(() => {
     let timeoutId: NodeJS.Timeout
 
-    if (user) {
-      console.log("User data available, fetching agents")
-      fetchAgents()
-    } else {
-      console.log("No user data available yet")
-      // Set a timeout to prevent infinite loading
-      timeoutId = setTimeout(() => {
-        setIsLoading(false)
-        console.log("Timeout reached, stopping loading state")
-      }, 5000) // 5 seconds timeout
+    const loadAgents = async () => {
+      // Try to refresh user data first
+      const currentUser = await refreshUser()
+      console.log("Dashboard: Refreshed user data", currentUser)
+
+      if (currentUser) {
+        console.log("User data available, fetching agents")
+        fetchAgents()
+      } else {
+        console.log("No user data available yet")
+        // Set a timeout to prevent infinite loading
+        timeoutId = setTimeout(() => {
+          setIsLoading(false)
+          console.log("Timeout reached, stopping loading state")
+        }, 5000) // 5 seconds timeout
+      }
     }
+
+    loadAgents()
 
     return () => {
       if (timeoutId) clearTimeout(timeoutId)
     }
-  }, [user, fetchAgents])
+  }, [user?.id, fetchAgents, refreshUser])
 
   const handleDelete = async (id: string) => {
     try {

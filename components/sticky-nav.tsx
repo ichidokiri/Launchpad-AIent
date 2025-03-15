@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -43,6 +43,13 @@ export function StickyNav() {
       console.log("Please install MetaMask!")
     }
   }
+
+  // Update the StickyNav component to be more reactive to auth state changes
+
+  // Add useEffect to log auth state changes
+  useEffect(() => {
+    console.log("StickyNav: Auth state changed", { user })
+  }, [user])
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-black border-b border-gray-800">
@@ -98,7 +105,7 @@ export function StickyNav() {
                 </>
               ) : (
                 <>
-                  <span className="text-sm font-semibold text-gray-300">{user.email}</span>
+                  <span className="text-sm font-semibold text-gray-300">{user.email || "User"}</span>
                   <Button
                     variant="ghost"
                     className="text-sm font-semibold text-white hover:bg-gray-800"

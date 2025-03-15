@@ -73,3 +73,23 @@ export async function checkDbConnection(): Promise<boolean> {
   }
 }
 
+// Add a new utility function to check if a user exists before creating related records
+
+/**
+ * Checks if a user exists by ID
+ * @param userId - The user ID to check
+ * @returns True if the user exists, false otherwise
+ */
+export async function userExists(userId: string): Promise<boolean> {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    })
+    return !!user
+  } catch (error) {
+    console.error("Error checking if user exists:", error)
+    return false
+  }
+}
+

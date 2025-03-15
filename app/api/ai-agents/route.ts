@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/db" // Use the singleton instance from lib/db.ts
+import { prisma, userExists } from "@/lib/db" // Use the singleton instance from lib/db.ts
 import { auth } from "@/lib/auth"
 
 export const dynamic = "force-dynamic"
@@ -13,9 +13,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log("Request body:", JSON.stringify(body, null, 2))
 
-    // 2. Authenticate the user (simplified)
-    // For testing, we'll use a hardcoded user if authentication fails
-    let userId = "test-user-id"
+    // 2. Authenticate the user with better error handling
+    let userId: string | null = null
 
     try {
       const user = await auth(request)
@@ -25,18 +24,42 @@ export async function POST(request: NextRequest) {
         userId = user.id
         console.log("Using authenticated user ID:", userId)
       } else {
-        console.log("Authentication failed, using test user ID")
+        console.log("Authentication failed, will try to find a valid user")
+      }
+    } catch (authError) {
+      console.error("Authentication error:", authError)
+      console.log("Will try to find a valid user in the database")
+    }
 
-        // Try to find a user in the database to use
+    // If we don't have a valid user ID yet, try to find one in the database
+    if (!userId) {
+      try {
+        // Find a user that actually exists in the database
         const firstUser = await prisma.user.findFirst()
         if (firstUser) {
           userId = firstUser.id
           console.log("Using first user from database:", userId)
+        } else {
+          console.error("No users found in the database")
+          return NextResponse.json({ error: "No valid user found to create the agent" }, { status: 400 })
         }
+      } catch (dbError) {
+        console.error("Error finding user:", dbError)
+        return NextResponse.json({ error: "Failed to find a valid user", details: String(dbError) }, { status: 500 })
       }
-    } catch (authError) {
-      console.error("Authentication error:", authError)
-      console.log("Continuing with test user ID")
+    }
+
+    // Verify that we have a valid user ID before proceeding
+    if (!userId) {
+      console.error("No valid user ID available")
+      return NextResponse.json({ error: "No valid user ID available to create the agent" }, { status: 400 })
+    }
+
+    // Verify that the user actually exists in the database
+    const userExistsInDb = await userExists(userId)
+    if (!userExistsInDb) {
+      console.error(`User with ID ${userId} does not exist in the database`)
+      return NextResponse.json({ error: `User with ID ${userId} does not exist in the database` }, { status: 400 })
     }
 
     // 3. Validate required fields

@@ -1,16 +1,16 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
-import { loginUser } from "@/app/actions"
 import Link from "next/link"
 import toast from "react-hot-toast"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { AuthContext } from "@/context/AuthContext"
 
 /**
  * Login page component
@@ -23,6 +23,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+  const { login, user } = useContext(AuthContext)
 
   // Check for expired token or auth error
   useEffect(() => {
@@ -36,43 +38,31 @@ export default function LoginPage() {
     }
   }, [searchParams])
 
+  // Add a useEffect to check auth state after successful login
+
+  // Add this useEffect to the component
+  useEffect(() => {
+    if (user) {
+      console.log("Login page: User is already logged in, redirecting to dashboard")
+      router.push("/dashboard")
+    }
+  }, [user, router])
+
   /**
    * Handles form submission
    * @param e - The form event
    */
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-
-    // Client-side validation
-    if (!email.trim()) {
-      toast.error("Email is required")
-      return
-    }
-
-    if (!password.trim()) {
-      toast.error("Password is required")
-      return
-    }
-
     setIsLoading(true)
+    setError("")
 
     try {
-      const result = await loginUser(email, password)
-
-      if (result.success) {
-        toast.success("Login successful!")
-        // Add a small delay before redirecting
-        setTimeout(() => {
-          const redirectTo = searchParams.get("from") || "/dashboard"
-          router.push(redirectTo)
-        }, 1000)
-      } else {
-        // Show error message from server
-        toast.error(result.message || "Invalid email or password")
-      }
-    } catch (error) {
-      console.error("Login error:", error)
-      toast.error("An unexpected error occurred. Please try again.")
+      await login(email, password)
+      // The login function in AuthContext will handle the state update and navigation
+    } catch (err) {
+      console.error("Login error:", err)
+      setError(err instanceof Error ? err.message : "Login failed")
     } finally {
       setIsLoading(false)
     }
@@ -125,6 +115,8 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+
+              {error && <p className="text-red-500">{error}</p>}
 
               <Button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                 {isLoading ? (
