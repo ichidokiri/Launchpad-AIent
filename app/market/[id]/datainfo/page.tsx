@@ -7,8 +7,9 @@ import { ArrowLeft, RefreshCw } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import ReactMarkdown from "react-markdown"
 import { Loader2 } from "lucide-react"
+import ReactMarkdown from "react-markdown"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 // Add the BASE_URL constant
 const BASE_URL = "http://140.112.29.197:13579"
@@ -224,6 +225,23 @@ Advanced algorithms uncover non-linear relationships:
   },
 ]
 
+// Define custom components for ReactMarkdown with styling
+const markdownComponents = {
+  // Add styling to all paragraph elements
+  p: ({ node, ...props }: any) => <p className="text-white mb-4" {...props} />,
+  // Add styling to all heading elements
+  h1: ({ node, ...props }: any) => <h1 className="text-white text-2xl font-bold mb-4" {...props} />,
+  h2: ({ node, ...props }: any) => <h2 className="text-white text-xl font-bold mb-3" {...props} />,
+  h3: ({ node, ...props }: any) => <h3 className="text-white text-lg font-bold mb-2" {...props} />,
+  // Add styling to lists
+  ul: ({ node, ...props }: any) => <ul className="text-white list-disc pl-5 mb-4" {...props} />,
+  ol: ({ node, ...props }: any) => <ol className="text-white list-decimal pl-5 mb-4" {...props} />,
+  // Add styling to list items
+  li: ({ node, ...props }: any) => <li className="text-white mb-1" {...props} />,
+  // Add styling to code blocks
+  code: ({ node, ...props }: any) => <code className="text-white bg-gray-800 px-1 rounded" {...props} />,
+}
+
 /**
  * Agent-specific DataInfo page component
  */
@@ -233,17 +251,35 @@ export default function AgentDataInfoPage() {
 
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedTopic, setSelectedTopic] = useState("")
-  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
   const [agentSymbol, setAgentSymbol] = useState<string | null>(null)
   const [agentName, setAgentName] = useState<string | null>(null)
   const [agentArticles, setAgentArticles] = useState<Article[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [apiArticle, setApiArticle] = useState<Article | null>(null)
+  const [newArticle, setNewArticle] = useState<Article | null>(null)
+  const [showArticleDialog, setShowArticleDialog] = useState(false)
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
+  const [generationError, setGenerationError] = useState<string | null>(null)
 
-  // Fetch agent details
+  // Fetch agent details - only once when component mounts
   useEffect(() => {
     const fetchAgentDetails = async () => {
       try {
+        // Check if we already have agent details in localStorage
+        const cachedAgentDetails = localStorage.getItem(`agent-details-${agentId}`)
+        if (cachedAgentDetails) {
+          const parsedDetails = JSON.parse(cachedAgentDetails)
+          setAgentSymbol(parsedDetails.symbol)
+          setAgentName(parsedDetails.name)
+
+          // Check if we have cached articles
+          const cachedArticles = localStorage.getItem(`agent-${agentId}-articles`)
+          if (cachedArticles) {
+            setAgentArticles(JSON.parse(cachedArticles))
+            return // Skip API call if we have cached data
+          }
+        }
+
+        // If no cached data, fetch from API
         const response = await fetch(`/api/agents/${agentId}`)
         if (!response.ok) {
           throw new Error("Failed to fetch agent details")
@@ -251,6 +287,15 @@ export default function AgentDataInfoPage() {
         const data = await response.json()
         setAgentSymbol(data.agent.symbol)
         setAgentName(data.agent.name)
+
+        // Cache agent details
+        localStorage.setItem(
+            `agent-details-${agentId}`,
+            JSON.stringify({
+              symbol: data.agent.symbol,
+              name: data.agent.name,
+            }),
+        )
 
         // Generate agent-specific articles
         // In a real app, you would fetch these from an API
@@ -365,7 +410,7 @@ For traders with longer timeframes, ${data.agent.symbol} offers excellent swing 
 Analysis of ${data.agent.symbol}'s price history reveals average cycle lengths of ${Math.floor(Math.random() * 10) + 14} days from trough to peak, with standard deviation of ±${Math.floor(Math.random() * 5) + 3} days.
 
 ### Entry Strategy
-1. Identify potential cycle bottoms using TD Sequential indicator (9-13 count)
+1. Identify potential cycle bottoms using TD Sequential indicator
 2. Confirm with bullish divergence on 4-hour RSI
 3. Enter when price reclaims the 5-day EMA with increasing volume
 
@@ -542,6 +587,9 @@ For investors, ${data.agent.symbol} represents a ${Math.random() > 0.5 ? "higher
         ]
 
         setAgentArticles(generatedArticles)
+
+        // Store agent articles in localStorage for persistence
+        localStorage.setItem(`agent-${agentId}-articles`, JSON.stringify(generatedArticles))
       } catch (error) {
         console.error("Error fetching agent details:", error)
       }
@@ -552,44 +600,101 @@ For investors, ${data.agent.symbol} represents a ${Math.random() > 0.5 ? "higher
     }
   }, [agentId])
 
-  // Function to send chat request to API
-  const sendChat = async () => {
-    setIsLoading(true)
+  // Function to enhance content with OpenAI
+  const enhanceWithOpenAI = async (
+      content: string,
+      agentName?: string | null,
+      agentSymbol?: string | null,
+  ): Promise<string> => {
     try {
-      const messages: ChatMessage[] = [
-        {
-          role: "system",
-          content: `You are a helpful assistant specializing in cryptocurrency and blockchain technology. You are an expert on ${agentName || "cryptocurrency"} (${agentSymbol || "crypto"}) and can provide detailed analysis and insights.`,
-        },
-        {
-          role: "user",
-          content: `Write a comprehensive article about ${agentName || "cryptocurrency"} (${agentSymbol || "crypto"}) focusing on recent developments, market trends, and future potential. Format the article with markdown headings, bullet points, and sections.`,
-        },
-      ]
-
-      const data = await request<{ response: string }>(`${BASE_URL}/chat`, {
+      const response = await fetch("/api/enhance-content", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(messages),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content,
+          agentName,
+          agentSymbol,
+          task: "Enhance this cryptocurrency article with more detailed analysis, professional language, and better structure. Add sections on technical analysis, fundamental outlook, and market sentiment if they don't exist. Format with proper markdown.",
+        }),
       })
 
-      // Create a new article from the API response
-      const newArticle: Article = {
+      if (!response.ok) {
+        throw new Error("Failed to enhance content")
+      }
+
+      const data = await response.json()
+      return data.enhancedContent
+    } catch (error) {
+      console.error("Error enhancing content with OpenAI:", error)
+      // Return original content if enhancement fails
+      return content
+    }
+  }
+
+  // Function to send topic to external API and generate article
+  const sendTopic = async (): Promise<string> => {
+    try {
+      // Create a topic based on the agent
+      const topic = `Write a comprehensive article about ${agentName || "cryptocurrency"} (${agentSymbol || "crypto"}) focusing on recent market trends, technical analysis, and investment outlook.`
+
+      // Send the topic to the external API
+      const response = await fetch(`${BASE_URL}/content`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // Important: The API expects just a string, not an object
+        body: JSON.stringify(topic),
+      })
+
+      if (!response.ok) {
+        const errorMsg = await response.text().catch(() => "")
+        throw new Error(`Request failed with status ${response.status}\n${errorMsg}`)
+      }
+
+      // Parse the response
+      const data = await response.json()
+      return data.response || "" // Return the response content
+    } catch (error) {
+      console.error("Error sending topic to external API:", error)
+      throw error // Re-throw to handle in the calling function
+    }
+  }
+
+  // Function to generate a new article
+  const generateNewArticle = async () => {
+    setIsLoading(true)
+    setGenerationError(null)
+
+    try {
+      // Step 1: Get initial content from the external API using sendTopic
+      const externalContent = await sendTopic()
+
+      // Step 2: Enhance the content with OpenAI
+      const enhancedContent = await enhanceWithOpenAI(externalContent, agentName, agentSymbol)
+
+      // Create a new article from the enhanced content
+      const article: Article = {
         id: Date.now(), // Use timestamp as unique ID
         title: `Latest ${agentSymbol || "Crypto"} Market Insights`,
-        content:
-            data.response ||
-            `# Latest ${agentSymbol || "Crypto"} Market Insights\n\nThis article provides the most recent analysis and insights about ${agentName || "cryptocurrency"} (${agentSymbol || "crypto"}) based on current market data and trends.`,
+        content: enhancedContent,
         topic: "analysis",
         agentSymbol: agentSymbol || undefined,
         date: new Date().toISOString().split("T")[0],
       }
 
-      setApiArticle(newArticle)
-      // Optionally, you could add this to agentArticles if you want it to persist
-      setAgentArticles((prev) => [newArticle, ...prev])
+      // Add to agent articles and store in localStorage
+      const updatedArticles = [article, ...agentArticles]
+      setAgentArticles(updatedArticles)
+      localStorage.setItem(`agent-${agentId}-articles`, JSON.stringify(updatedArticles))
+
+      // Set the new article and show dialog
+      setNewArticle(article)
+      setShowArticleDialog(true)
     } catch (error) {
-      console.error("Error fetching from API:", error)
+      console.error("Error generating article:", error)
+      setGenerationError("Failed to generate article. Please try again later.")
+
       // Create a fallback article if the API fails
       const fallbackArticle: Article = {
         id: Date.now(),
@@ -618,18 +723,27 @@ Market participants should remain vigilant of broader crypto market conditions w
         date: new Date().toISOString().split("T")[0],
       }
 
-      setApiArticle(fallbackArticle)
-      setAgentArticles((prev) => [fallbackArticle, ...prev])
+      // Add to agent articles and store in localStorage
+      const updatedArticles = [fallbackArticle, ...agentArticles]
+      setAgentArticles(updatedArticles)
+      localStorage.setItem(`agent-${agentId}-articles`, JSON.stringify(updatedArticles))
+
+      // Set the fallback article and show dialog
+      setNewArticle(fallbackArticle)
+      setShowArticleDialog(true)
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Combine mock articles with agent-specific articles and API article
-  const allArticles = [...mockArticles, ...agentArticles]
-  if (apiArticle && !allArticles.some((article) => article.id === apiArticle.id)) {
-    allArticles.unshift(apiArticle)
+  // Function to handle article click
+  const handleArticleClick = (article: Article) => {
+    setSelectedArticle(article)
+    setShowArticleDialog(true)
   }
+
+  // Combine mock articles with agent-specific articles
+  const allArticles = [...mockArticles, ...agentArticles]
 
   // Filter articles based on search term, selected topic, and agent symbol
   const filteredArticles = allArticles.filter(
@@ -640,23 +754,6 @@ Market participants should remain vigilant of broader crypto market conditions w
   )
 
   const topics = ["analysis", "trading", "fundamentals", "data analysis"]
-
-  // Define custom components for ReactMarkdown with styling
-  const markdownComponents = {
-    // Add styling to all paragraph elements
-    p: ({ node, ...props }: any) => <p className="text-white mb-4" {...props} />,
-    // Add styling to all heading elements
-    h1: ({ node, ...props }: any) => <h1 className="text-white text-2xl font-bold mb-4" {...props} />,
-    h2: ({ node, ...props }: any) => <h2 className="text-white text-xl font-bold mb-3" {...props} />,
-    h3: ({ node, ...props }: any) => <h3 className="text-white text-lg font-bold mb-2" {...props} />,
-    // Add styling to lists
-    ul: ({ node, ...props }: any) => <ul className="text-white list-disc pl-5 mb-4" {...props} />,
-    ol: ({ node, ...props }: any) => <ol className="text-white list-decimal pl-5 mb-4" {...props} />,
-    // Add styling to list items
-    li: ({ node, ...props }: any) => <li className="text-white mb-1" {...props} />,
-    // Add styling to code blocks
-    code: ({ node, ...props }: any) => <code className="text-white bg-gray-800 px-1 rounded" {...props} />,
-  }
 
   return (
       <div className="container mx-auto px-4 py-8 bg-black text-white">
@@ -692,7 +789,7 @@ Market participants should remain vigilant of broader crypto market conditions w
             </select>
           </div>
 
-          <Button onClick={sendChat} disabled={isLoading} className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Button onClick={generateNewArticle} disabled={isLoading} className="bg-blue-600 hover:bg-blue-700 text-white">
             {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -707,57 +804,64 @@ Market participants should remain vigilant of broader crypto market conditions w
           </Button>
         </div>
 
-        {selectedArticle ? (
-            <div>
-              <Button onClick={() => setSelectedArticle(null)} className="mb-4 bg-[#2F2F2F] hover:bg-gray-600 text-white">
-                Back to Articles
-              </Button>
-              <Card className="bg-[#2F2F2F] border-gray-700 text-white">
-                <CardHeader>
-                  <CardTitle>{selectedArticle.title}</CardTitle>
-                  {selectedArticle.date && <p className="text-sm text-gray-400">Published: {selectedArticle.date}</p>}
-                </CardHeader>
-                <CardContent>
-                  <ReactMarkdown components={markdownComponents}>{selectedArticle.content}</ReactMarkdown>
-                </CardContent>
-              </Card>
-            </div>
-        ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredArticles.length > 0 ? (
-                  filteredArticles.map((article) => (
-                      <Card
-                          key={article.id}
-                          className="cursor-pointer bg-[#2F2F2F] border-gray-700 hover:bg-gray-700 transition-colors"
-                          onClick={() => setSelectedArticle(article)}
-                      >
-                        <CardHeader>
-                          <CardTitle className="text-white">{article.title}</CardTitle>
-                          {article.date && <p className="text-sm text-gray-400">Published: {article.date}</p>}
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm text-gray-400">Topic: {article.topic}</p>
-                          <p className="mt-2 text-gray-300">{article.content.substring(0, 100)}...</p>
-                        </CardContent>
-                      </Card>
-                  ))
-              ) : (
-                  <div className="col-span-full text-center py-10">
-                    <p className="text-lg text-gray-400">No articles found matching your criteria.</p>
-                    <Button
-                        variant="outline"
-                        className="mt-4 bg-[#2F2F2F] border-gray-700 text-white hover:bg-gray-600"
-                        onClick={() => {
-                          setSearchTerm("")
-                          setSelectedTopic("")
-                        }}
-                    >
-                      Clear Filters
-                    </Button>
-                  </div>
-              )}
+        {generationError && (
+            <div className="mb-6 p-4 bg-red-900/50 border border-red-700 rounded-md">
+              <p className="text-red-200">{generationError}</p>
             </div>
         )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredArticles.length > 0 ? (
+              filteredArticles.map((article) => (
+                  <div key={article.id} onClick={() => handleArticleClick(article)} className="cursor-pointer">
+                    <Card className="bg-[#2F2F2F] border-gray-700 hover:bg-gray-700 transition-colors h-full">
+                      <CardHeader>
+                        <CardTitle className="text-white">{article.title}</CardTitle>
+                        {article.date && <p className="text-sm text-gray-400">Published: {article.date}</p>}
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-400">Topic: {article.topic}</p>
+                        <p className="mt-2 text-gray-300">{article.content.substring(0, 100)}...</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+              ))
+          ) : (
+              <div className="col-span-full text-center py-10">
+                <p className="text-lg text-gray-400">No articles found matching your criteria.</p>
+                <Button
+                    variant="outline"
+                    className="mt-4 bg-[#2F2F2F] border-gray-700 text-white hover:bg-gray-600"
+                    onClick={() => {
+                      setSearchTerm("")
+                      setSelectedTopic("")
+                    }}
+                >
+                  Clear Filters
+                </Button>
+              </div>
+          )}
+        </div>
+
+        {/* Article Dialog */}
+        <Dialog open={showArticleDialog} onOpenChange={setShowArticleDialog}>
+          <DialogContent className="bg-[#2F2F2F] text-white border-gray-700 max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl md:text-2xl">{(selectedArticle || newArticle)?.title}</DialogTitle>
+              {(selectedArticle || newArticle)?.date && (
+                  <p className="text-sm text-gray-400">Published: {(selectedArticle || newArticle)?.date}</p>
+              )}
+              {(selectedArticle || newArticle)?.topic && (
+                  <p className="text-sm text-gray-400">Topic: {(selectedArticle || newArticle)?.topic}</p>
+              )}
+            </DialogHeader>
+            <div className="mt-4">
+              <ReactMarkdown components={markdownComponents}>
+                {(selectedArticle || newArticle)?.content || ""}
+              </ReactMarkdown>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
   )
 }
