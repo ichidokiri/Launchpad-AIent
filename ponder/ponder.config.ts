@@ -427,7 +427,7 @@ export default createConfig({
       network: {
         [monadTestnet.id]: {
           address: agentManagerAddress[monadTestnet.id],
-          startBlock: 7441535,
+          startBlock: "latest",
           // endBlock: 7445000,
           // startBlock: "latest",
         },

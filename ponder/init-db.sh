@@ -5,7 +5,7 @@ sleep 3
 
 # Drop and recreate the ponder schema
 echo "Dropping and recreating ponder schema..."
-PGPASSWORD=ponder_password psql -h db -U ponder -d ponder_prod -c 'DROP SCHEMA IF EXISTS ponder CASCADE;'
+PGPASSWORD=ponder_password psql -h ponder-db -U ponder -d postgres -c 'DROP SCHEMA IF EXISTS ponder CASCADE;'
 
 echo "Schema dropped successfully!"
 

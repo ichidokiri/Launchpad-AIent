@@ -1,0 +1,82 @@
+version: "3.8"
+
+services:
+  # Next.js application
+  nextjs:
+    container_name: nextjs-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - PONDER_API_URL=http://ponder:42069
+    # depends_on:
+    #   ponder:
+    #     condition: service_healthy
+    networks:
+      - app-network
+      - ponder-network
+    restart: unless-stopped
+
+  # Ponder database
+  ponder-db:
+    container_name: ponder-db
+    image: postgres:15-alpine
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_USER: ponder
+      POSTGRES_PASSWORD: ponder_password
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ponder-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ponder -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Ponder application
+  ponder:
+    container_name: ponder-app
+    build:
+      context: ./ponder
+      dockerfile: Dockerfile
+    command: /app/init-db.sh
+    environment:
+      PONDER_DATABASE_URL: ${DATABASE_URL:-postgres://ponder:ponder_password@ponder-db:5432/postgres}
+      PONDER_RPC_URL_10143: ${PONDER_RPC_URL_10143}
+      DATABASE_SCHEMA: ${DATABASE_SCHEMA:-ponder}
+      NODE_ENV: production
+      PONDER_TELEMETRY_DISABLED: true
+      PONDER_LOG_LEVEL: trace
+    depends_on:
+      ponder-db:
+        condition: service_healthy
+    ports:
+      - "42069:42069"
+    networks:
+      - ponder-network
+    volumes:
+      - ./ponder:/app
+      - ponder_node_modules:/app/node_modules
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:42069/health"]
+    #   interval: 10s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  ponder_node_modules:
+
+networks:
+  app-network:
+  ponder-network:

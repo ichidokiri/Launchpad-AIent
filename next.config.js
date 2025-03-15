@@ -73,9 +73,9 @@ const nextConfig = {
     domains: ["placeholder.svg", "localhost"],
   },
 
-  // Remove the standalone output setting to avoid symlink issues
   poweredByHeader: false,
   reactStrictMode: true,
+  output: "standalone",
 };
 
 module.exports = nextConfig;
