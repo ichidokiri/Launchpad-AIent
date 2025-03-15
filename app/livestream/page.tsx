@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
@@ -9,6 +9,25 @@ export default function LivestreamPage() {
     "https://www.youtube.com/embed/live_stream?channel=UCSJ4gkVC6NrvII8umztf0Ow",
   )
   const [inputUrl, setInputUrl] = useState("")
+  const [agentSymbol, setAgentSymbol] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Get agent symbol from URL if present
+    const urlParams = new URLSearchParams(window.location.search)
+    const agent = urlParams.get("agent")
+    if (agent) {
+      setAgentSymbol(agent)
+
+      // Set a default stream URL based on the agent symbol
+      // This is just an example - you would need to map agent symbols to actual stream URLs
+      if (agent === "BTC" || agent === "BTCUSD") {
+        setStreamUrl("https://www.youtube.com/embed/live_stream?channel=UCSJ4gkVC6NrvII8umztf0Ow")
+      } else if (agent === "ETH" || agent === "ETHUSD") {
+        setStreamUrl("https://www.youtube.com/embed/live_stream?channel=UCJnKNq1ro2l5oxB-bAeaOhQ")
+      }
+      // Add more mappings as needed
+    }
+  }, [])
 
   const handleStreamChange = () => {
     if (inputUrl) {
@@ -36,7 +55,7 @@ export default function LivestreamPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 bg-black text-white">
-      <h1 className="text-3xl font-bold mb-6">Livestream</h1>
+      <h1 className="text-3xl font-bold mb-6">{agentSymbol ? `${agentSymbol} Livestream` : "Livestream"}</h1>
       <div className="w-full max-w-5xl mx-auto">
         <div
           className="relative w-full bg-[#2F2F2F] rounded-lg overflow-hidden"

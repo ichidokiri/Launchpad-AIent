@@ -29,11 +29,11 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Error in chat API:", error)
     return NextResponse.json(
-        {
-          error: "Failed to generate response",
-          details: error instanceof Error ? error.message : String(error),
-        },
-        { status: 500 },
+      {
+        error: "Failed to generate response",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 },
     )
   }
 }

@@ -19,9 +19,19 @@ interface RateLimitInfo {
   violations: number
 }
 
+// Define the global rate limit cache type
+declare global {
+  var rateLimitCache: Map<string, any>
+}
+
+// Initialize the global cache if it doesn't exist
+if (!global.rateLimitCache) {
+  global.rateLimitCache = new Map()
+}
+
 // Store rate limit information in memory
 // In production, consider using Redis or another distributed cache
-const rateLimit = new Map<string, RateLimitInfo>()
+const rateLimitMap = new Map<string, RateLimitInfo>()
 
 /**
  * Get the client IP address from request headers
@@ -42,7 +52,7 @@ function getClientIp(req: NextRequest): string {
   }
 
   // If no IP found in headers, return unknown
-  return "unknown"
+  return "127.0.0.1"
 }
 
 /**
@@ -56,7 +66,7 @@ export function rateLimiter(req: NextRequest): NextResponse | null {
   const now = Date.now()
 
   // Get or initialize rate limit info for this IP
-  let info = rateLimit.get(ip)
+  let info = rateLimitMap.get(ip)
 
   if (!info) {
     info = {
@@ -65,7 +75,7 @@ export function rateLimiter(req: NextRequest): NextResponse | null {
       blocked: false,
       violations: 0,
     }
-    rateLimit.set(ip, info)
+    rateLimitMap.set(ip, info)
   }
 
   // Check if IP is blocked
@@ -76,7 +86,7 @@ export function rateLimiter(req: NextRequest): NextResponse | null {
       info.violations = 0
       info.count = 1
       info.resetTime = now + RATE_LIMIT_WINDOW
-      rateLimit.set(ip, info)
+      rateLimitMap.set(ip, info)
       return null
     }
 
@@ -104,7 +114,7 @@ export function rateLimiter(req: NextRequest): NextResponse | null {
     if (info.violations >= BLOCK_THRESHOLD) {
       info.blocked = true
       info.blockExpires = now + BLOCK_DURATION
-      rateLimit.set(ip, info)
+      rateLimitMap.set(ip, info)
 
       return NextResponse.json(
         { error: "Too many requests. Please try again later." },
@@ -115,7 +125,7 @@ export function rateLimiter(req: NextRequest): NextResponse | null {
     // Reset for next window
     info.count = 1
     info.resetTime = now + RATE_LIMIT_WINDOW
-    rateLimit.set(ip, info)
+    rateLimitMap.set(ip, info)
 
     return NextResponse.json(
       { error: "Rate limit exceeded. Please try again later." },
@@ -124,7 +134,7 @@ export function rateLimiter(req: NextRequest): NextResponse | null {
   }
 
   // Update rate limit info
-  rateLimit.set(ip, info)
+  rateLimitMap.set(ip, info)
   return null
 }
 
@@ -133,10 +143,54 @@ setInterval(() => {
   const now = Date.now()
 
   // Use forEach instead of for...of with entries()
-  rateLimit.forEach((info, ip) => {
+  rateLimitMap.forEach((info, ip) => {
     if (now > info.resetTime && (!info.blocked || (info.blockExpires && now > info.blockExpires))) {
-      rateLimit.delete(ip)
+      rateLimitMap.delete(ip)
     }
   })
 }, 60 * 1000)
+
+// Export the rateLimit object for the check method
+export const rateLimit = {
+  check: async (req: NextRequest, limit: number, timeFrame: string) => {
+    const identifier = getClientIp(req)
+
+    const timeFrameSeconds = Number.parseInt(timeFrame.split(" ")[0]) * 60
+
+    const bucket = (await global.rateLimitCache.get(identifier)) ?? {
+      tokens: limit,
+      resetTime: Date.now() + timeFrameSeconds * 1000,
+    }
+
+    if (bucket.tokens > 0) {
+      bucket.tokens -= 1
+      await global.rateLimitCache.set(identifier, bucket)
+      return {
+        success: true,
+        limit: limit,
+        remaining: bucket.tokens,
+        reset: bucket.resetTime,
+      }
+    }
+
+    if (Date.now() > bucket.resetTime) {
+      bucket.resetTime = Date.now() + timeFrameSeconds * 1000
+      bucket.tokens = limit - 1
+      await global.rateLimitCache.set(identifier, bucket)
+      return {
+        success: true,
+        limit: limit,
+        remaining: bucket.tokens,
+        reset: bucket.resetTime,
+      }
+    }
+
+    return {
+      success: false,
+      limit: limit,
+      remaining: 0,
+      reset: bucket.resetTime,
+    }
+  },
+}
 

@@ -27,7 +27,7 @@ pathsToClear.forEach((dirPath) => {
   }
 })
 
-// Update next.config.mjs to disable certain features that might be causing issues
+// Update next.config.js to disable certain features that might be causing issues
 try {
   const configPath = "next.config.mjs"
   const configExists = fs.existsSync(configPath)
@@ -39,8 +39,8 @@ try {
 
     // Disable experimental features that might be causing issues
     nextConfig = nextConfig.replace(
-        /experimental:\s*{[^}]*}/,
-        `experimental: {
+      /experimental:\s*{[^}]*}/,
+      `experimental: {
       serverComponentsExternalPackages: ["@prisma/client", "bcryptjs"],
       outputFileTracingRoot: undefined,
       // Disable features that might be causing build issues

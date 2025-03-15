@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import Image from "next/image"
 import { CheckCircle2, Copy, ExternalLink } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -11,9 +11,11 @@ import { SwapInterface } from "@/components/swap-interface"
 import { LoadingSpinner } from "@/components/loading-spinner"
 import { toast } from "react-hot-toast"
 import type { Agent } from "@/types/agent"
+import { Button } from "@/components/ui/button"
 
 export default function AgentDetailsPage() {
   const params = useParams()
+  const router = useRouter()
   const [agent, setAgent] = useState<Agent | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -109,6 +111,8 @@ export default function AgentDetailsPage() {
     )
   }
 
+  const agentId = params?.id as string
+
   return (
     <div className="min-h-screen bg-background px-6">
       <div className="mx-auto max-w-[1400px] py-8">
@@ -164,24 +168,52 @@ export default function AgentDetailsPage() {
           </div>
         </div>
 
-        {/* Chart and Swap Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr,400px] gap-8 mb-8">
-          {/* Price Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Price Chart</CardTitle>
-            </CardHeader>
-            <CardContent className="h-[400px]">
-              <AgentChart />
-            </CardContent>
-          </Card>
-
-          {/* Swap Interface */}
-          <SwapInterface />
+        {/* Navigation buttons for agent-specific pages */}
+        <div className="flex flex-wrap gap-4 mb-8">
+          <Button
+            variant="outline"
+            className="bg-[#2F2F2F] border-gray-700 text-white hover:bg-gray-600"
+            onClick={() => router.push(`/market/${agentId}/tradegpt`)}
+          >
+            {agent.name} TradeGPT
+          </Button>
+          <Button
+            variant="outline"
+            className="bg-[#2F2F2F] border-gray-700 text-white hover:bg-gray-600"
+            onClick={() => router.push(`/market/${agentId}/datainfo`)}
+          >
+            {agent.name} DataInfo
+          </Button>
+          <Button
+            variant="outline"
+            className="bg-[#2F2F2F] border-gray-700 text-white hover:bg-gray-600"
+            onClick={() => router.push(`/market/${agentId}/livestream`)}
+          >
+            {agent.name} Livestream
+          </Button>
         </div>
 
-        {/* Additional Details Section */}
+        {/* Chart and Swap in the same tab */}
         <Card>
+          <CardHeader>
+            <CardTitle>Price Chart & Swap</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <div className="h-[400px]">
+                  <AgentChart />
+                </div>
+              </div>
+              <div className="lg:col-span-1">
+                <SwapInterface />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Additional Details Section */}
+        <Card className="mt-8">
           <CardContent className="p-6">
             <div className="space-y-6">
               <p className="text-muted-foreground">{agent.description || "No description available."}</p>

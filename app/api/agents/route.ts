@@ -9,7 +9,6 @@ import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import type { NextRequest } from "next/server"
-import { getModelName } from "@/lib/db"
 
 /**
  * Creates a new agent
@@ -30,11 +29,11 @@ export async function POST(req: Request) {
     // Validate required fields
     if (!name || !symbol || !price || !tokenAmount) {
       return NextResponse.json(
-          {
-            error: "Missing required fields",
-            message: "Please fill in all required fields",
-          },
-          { status: 400 },
+        {
+          error: "Missing required fields",
+          message: "Please fill in all required fields",
+        },
+        { status: 400 },
       )
     }
 
@@ -42,11 +41,11 @@ export async function POST(req: Request) {
     const symbolRegex = /^[A-Z0-9]{1,10}$/
     if (!symbolRegex.test(symbol)) {
       return NextResponse.json(
-          {
-            error: "Invalid symbol format",
-            message: "Symbol must be 1-10 uppercase letters or numbers",
-          },
-          { status: 400 },
+        {
+          error: "Invalid symbol format",
+          message: "Symbol must be 1-10 uppercase letters or numbers",
+        },
+        { status: 400 },
       )
     }
 
@@ -63,11 +62,11 @@ export async function POST(req: Request) {
 
     if (existingAgent) {
       return NextResponse.json(
-          {
-            error: "Symbol already exists",
-            message: "This symbol is already in use. Please choose a different symbol.",
-          },
-          { status: 400 },
+        {
+          error: "Symbol already exists",
+          message: "This symbol is already in use. Please choose a different symbol.",
+        },
+        { status: 400 },
       )
     }
 
@@ -78,11 +77,11 @@ export async function POST(req: Request) {
 
     if (!dbUser) {
       return NextResponse.json(
-          {
-            error: "User not found",
-            message: "Please log in again",
-          },
-          { status: 401 },
+        {
+          error: "User not found",
+          message: "Please log in again",
+        },
+        { status: 401 },
       )
     }
 
@@ -116,11 +115,11 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Error creating AI agent:", error)
     return NextResponse.json(
-        {
-          error: "Failed to create AI agent",
-          message: "An unexpected error occurred while creating the agent",
-        },
-        { status: 500 },
+      {
+        error: "Failed to create AI agent",
+        message: "An unexpected error occurred while creating the agent",
+      },
+      { status: 500 },
     )
   }
 }
@@ -160,8 +159,7 @@ export async function GET(request: NextRequest) {
 
     console.log("Prisma query:", JSON.stringify(query, null, 2))
 
-    const agentModelName = getModelName("AIAgent")
-    const agents = await (prisma as any)[agentModelName].findMany(query)
+    const agents = await prisma.aIAgent.findMany(query)
 
     console.log(`Found ${agents.length} agents`)
 
@@ -169,12 +167,12 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Error fetching agents:", error)
     return NextResponse.json(
-        {
-          error: "Failed to fetch agents",
-          message: error instanceof Error ? error.message : String(error),
-          stack: process.env.NODE_ENV === "development" ? (error instanceof Error ? error.stack : undefined) : undefined,
-        },
-        { status: 500 },
+      {
+        error: "Failed to fetch agents",
+        message: error instanceof Error ? error.message : String(error),
+        stack: process.env.NODE_ENV === "development" ? (error instanceof Error ? error.stack : undefined) : undefined,
+      },
+      { status: 500 },
     )
   } finally {
     await prisma.$disconnect()

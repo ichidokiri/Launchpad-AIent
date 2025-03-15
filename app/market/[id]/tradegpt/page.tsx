@@ -2,7 +2,8 @@
 
 import type React from "react"
 import { useState, useRef, useEffect, useCallback } from "react"
-import { Volume2, ThumbsUp, ThumbsDown, Copy, RotateCcw, Loader2, Send } from "lucide-react"
+import { useParams } from "next/navigation"
+import { Volume2, ThumbsUp, ThumbsDown, Copy, RotateCcw, Loader2, Send, ArrowLeft } from "lucide-react"
 import { cn } from "@/lib/utils"
 import toast from "react-hot-toast"
 import { Button } from "@/components/ui/button"
@@ -10,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import ReactMarkdown from "react-markdown"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { nord } from "react-syntax-highlighter/dist/esm/styles/prism"
+import Link from "next/link"
 
 // Define types for the feedback
 type Feedback = "like" | "dislike" | null
@@ -40,12 +42,16 @@ const MarkdownComponents = {
   },
 }
 
-export default function TradeGPTPage() {
+export default function AgentTradeGPTPage() {
+  const params = useParams()
+  const agentId = params?.id as string
+
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
   const [agentSymbol, setAgentSymbol] = useState<string | null>(null)
+  const [agentName, setAgentName] = useState<string | null>(null)
 
   const [feedback, setFeedback] = useState<Record<string, Feedback>>({})
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -53,6 +59,37 @@ export default function TradeGPTPage() {
   const [currentSpeakingId, setCurrentSpeakingId] = useState<string | null>(null)
   const speechSynthesisRef = useRef<SpeechSynthesis | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Fetch agent details
+  useEffect(() => {
+    const fetchAgentDetails = async () => {
+      try {
+        const response = await fetch(`/api/agents/${agentId}`)
+        if (!response.ok) {
+          throw new Error("Failed to fetch agent details")
+        }
+        const data = await response.json()
+        setAgentSymbol(data.agent.symbol)
+        setAgentName(data.agent.name)
+
+        // Add welcome message
+        setMessages([
+          {
+            id: "welcome",
+            role: "assistant",
+            content: `Welcome to the ${data.agent.name} (${data.agent.symbol}) TradeGPT assistant. How can I help you with ${data.agent.symbol} today?`,
+          },
+        ])
+      } catch (error) {
+        console.error("Error fetching agent details:", error)
+        toast.error("Failed to fetch agent details")
+      }
+    }
+
+    if (agentId) {
+      fetchAgentDetails()
+    }
+  }, [agentId])
 
   // Handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -160,6 +197,7 @@ export default function TradeGPTPage() {
         },
         body: JSON.stringify({
           messages: newMessages.map(({ role, content }) => ({ role, content })),
+          agentSymbol,
         }),
       })
 
@@ -197,25 +235,6 @@ export default function TradeGPTPage() {
     return () => {
       if (speechSynthesisRef.current) {
         speechSynthesisRef.current.cancel()
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    // Get agent symbol from URL if present
-    const urlParams = new URLSearchParams(window.location.search)
-    const agent = urlParams.get("agent")
-    if (agent) {
-      setAgentSymbol(agent)
-      // If we have an agent, add a welcome message
-      if (messages.length === 0) {
-        setMessages([
-          {
-            id: "welcome",
-            role: "assistant",
-            content: `Welcome to the ${agent} TradeGPT assistant. How can I help you with ${agent} today?`,
-          },
-        ])
       }
     }
   }, [])
@@ -329,124 +348,106 @@ export default function TradeGPTPage() {
 
   return (
     <div className="flex flex-col h-screen max-h-screen bg-background">
+      <div className="border-b p-4">
+        <div className="max-w-3xl mx-auto flex items-center">
+          <Link href={`/market/${agentId}`} className="mr-4">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <h1 className="text-xl font-bold">{agentName || "Agent"} TradeGPT</h1>
+        </div>
+      </div>
+
       <div className="flex-1 overflow-y-auto p-4">
         <div className="max-w-3xl mx-auto space-y-4 pb-20">
-          {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full min-h-[60vh]">
-              <h1 className="text-3xl font-bold mb-2">TradeGPT</h1>
-              <p className="text-muted-foreground text-center max-w-md mb-8">
-                Your AI assistant for trading, market analysis, and financial insights.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl">
-                {[
-                  "Explain the current market trends for tech stocks",
-                  "What are the key indicators for a bullish market?",
-                  "Analyze the potential impact of recent Fed decisions",
-                  "Suggest a diversified portfolio strategy for a beginner",
-                ].map((suggestion, index) => (
-                  <Button
-                    key={index}
-                    variant="outline"
-                    className="h-auto p-4 justify-start text-left whitespace-normal break-words min-h-[80px] bg-[#1f1f1f] border-gray-700 hover:bg-gray-800 text-gray-200"
-                    onClick={() => {
-                      // Send the suggestion directly
-                      sendMessage(suggestion)
-                    }}
-                  >
-                    {suggestion}
-                  </Button>
-                ))}
+          {messages.map((message: ChatMessage) => (
+            <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div
+                className={`relative max-w-lg rounded-2xl px-4 py-3 ${
+                  message.role === "user" ? "bg-black text-white" : "bg-zinc-100 text-black"
+                }`}
+              >
+                <div className="text-sm">
+                  <ReactMarkdown components={MarkdownComponents}>{message.content}</ReactMarkdown>
+                </div>
+
+                {message.role === "assistant" && (
+                  <div className="flex items-center gap-2 mt-4">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() =>
+                        isSpeaking && currentSpeakingId === message.id
+                          ? stopSpeaking()
+                          : speakText(message.content, message.id)
+                      }
+                      className={cn(
+                        "h-8 w-8 rounded-full",
+                        isSpeaking && currentSpeakingId === message.id
+                          ? "bg-blue-600 text-white"
+                          : "hover:bg-gray-200 dark:hover:bg-gray-700",
+                      )}
+                    >
+                      <Volume2
+                        className={cn(
+                          "h-4 w-4",
+                          isSpeaking && currentSpeakingId === message.id
+                            ? "text-white"
+                            : "text-gray-600 dark:text-gray-300",
+                        )}
+                      />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => copyToClipboard(message.content)}
+                      className="h-8 w-8 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 active:bg-blue-600 active:text-white"
+                    >
+                      <Copy className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => handleFeedback(message.id, "like")}
+                      className={cn(
+                        "h-8 w-8 rounded-full",
+                        feedback[message.id] === "like"
+                          ? "bg-green-600 text-white"
+                          : "hover:bg-gray-200 dark:hover:bg-gray-700",
+                      )}
+                    >
+                      <ThumbsUp
+                        className={cn(
+                          "h-4 w-4",
+                          feedback[message.id] === "like" ? "text-white" : "text-gray-600 dark:text-gray-300",
+                        )}
+                      />
+                    </Button>
+
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => handleFeedback(message.id, "dislike")}
+                      className={cn(
+                        "h-8 w-8 rounded-full",
+                        feedback[message.id] === "dislike"
+                          ? "bg-red-600 text-white"
+                          : "hover:bg-gray-200 dark:hover:bg-gray-700",
+                      )}
+                    >
+                      <ThumbsDown
+                        className={cn(
+                          "h-4 w-4",
+                          feedback[message.id] === "dislike" ? "text-white" : "text-gray-600 dark:text-gray-300",
+                        )}
+                      />
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
-          ) : (
-            messages.map((message: ChatMessage) => (
-              <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`relative max-w-lg rounded-2xl px-4 py-3 ${
-                    message.role === "user" ? "bg-black text-white" : "bg-zinc-100 text-black"
-                  }`}
-                >
-                  <div className="text-sm">
-                    <ReactMarkdown components={MarkdownComponents}>{message.content}</ReactMarkdown>
-                  </div>
-
-                  {message.role === "assistant" && (
-                    <div className="flex items-center gap-2 mt-4">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() =>
-                          isSpeaking && currentSpeakingId === message.id
-                            ? stopSpeaking()
-                            : speakText(message.content, message.id)
-                        }
-                        className={cn(
-                          "h-8 w-8 rounded-full",
-                          isSpeaking && currentSpeakingId === message.id
-                            ? "bg-blue-600 text-white"
-                            : "hover:bg-gray-200 dark:hover:bg-gray-700",
-                        )}
-                      >
-                        <Volume2
-                          className={cn(
-                            "h-4 w-4",
-                            isSpeaking && currentSpeakingId === message.id
-                              ? "text-white"
-                              : "text-gray-600 dark:text-gray-300",
-                          )}
-                        />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => copyToClipboard(message.content)}
-                        className="h-8 w-8 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 active:bg-blue-600 active:text-white"
-                      >
-                        <Copy className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => handleFeedback(message.id, "like")}
-                        className={cn(
-                          "h-8 w-8 rounded-full",
-                          feedback[message.id] === "like"
-                            ? "bg-green-600 text-white"
-                            : "hover:bg-gray-200 dark:hover:bg-gray-700",
-                        )}
-                      >
-                        <ThumbsUp
-                          className={cn(
-                            "h-4 w-4",
-                            feedback[message.id] === "like" ? "text-white" : "text-gray-600 dark:text-gray-300",
-                          )}
-                        />
-                      </Button>
-
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => handleFeedback(message.id, "dislike")}
-                        className={cn(
-                          "h-8 w-8 rounded-full",
-                          feedback[message.id] === "dislike"
-                            ? "bg-red-600 text-white"
-                            : "hover:bg-gray-200 dark:hover:bg-gray-700",
-                        )}
-                      >
-                        <ThumbsDown
-                          className={cn(
-                            "h-4 w-4",
-                            feedback[message.id] === "dislike" ? "text-white" : "text-gray-600 dark:text-gray-300",
-                          )}
-                        />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
+          ))}
           {error && (
             <Card className="overflow-hidden bg-red-900/20 border-red-500">
               <CardContent className="p-4">
@@ -482,7 +483,7 @@ export default function TradeGPTPage() {
               value={input}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              placeholder="Ask TradeGPT something..."
+              placeholder={`Ask about ${agentSymbol || "this agent"}...`}
               disabled={isLoading}
               className="w-full resize-none rounded-lg border border-zinc-200 p-4 pr-12 focus:border-zinc-400 focus:outline-none focus:ring-0 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
               style={{
@@ -500,12 +501,12 @@ export default function TradeGPTPage() {
           </form>
 
           <div className="flex justify-center gap-2 mt-2">
-            {messages.length > 0 && (
+            {messages.length > 1 && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={regenerateResponse}
-                disabled={isLoading || messages.length === 0}
+                disabled={isLoading || messages.length <= 1}
               >
                 <RotateCcw className="h-3 w-3 mr-2" />
                 Regenerate

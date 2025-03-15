@@ -70,7 +70,6 @@
     "fs": "latest",
     "path": "latest",
     "openai": "latest",
-    "ai": "latest",
     "react-syntax-highlighter": "latest"
   },
   "devDependencies": {

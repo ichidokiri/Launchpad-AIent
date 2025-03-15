@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -46,6 +46,9 @@ export default function DataInfoPage() {
   // Properly type the selectedArticle state variable as Article | null
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
 
+  // Add this near the top of the component, after the useState declarations
+  const [agentSymbol, setAgentSymbol] = useState<string | null>(null)
+
   // Filter articles based on search term and selected topic
   const filteredArticles = mockArticles.filter(
     (article) =>
@@ -72,9 +75,30 @@ export default function DataInfoPage() {
     code: ({ node, ...props }: any) => <code className="text-white bg-gray-800 px-1 rounded" {...props} />,
   }
 
+  // Add this inside useEffect or create a new useEffect
+  useEffect(() => {
+    // Get agent symbol from URL if present
+    const urlParams = new URLSearchParams(window.location.search)
+    const agent = urlParams.get("agent")
+    if (agent) {
+      setAgentSymbol(agent)
+      // Filter articles by agent if needed
+      if (agent) {
+        const agentArticles = mockArticles.filter(
+          (article) => article.title.includes(agent) || article.content.includes(agent),
+        )
+        if (agentArticles.length > 0) {
+          setSelectedTopic("")
+          setSearchTerm("")
+        }
+      }
+    }
+  }, [])
+
+  // Modify the page title to include agent if available
   return (
     <div className="container mx-auto px-4 py-8 bg-black text-white">
-      <h1 className="text-3xl font-bold mb-6">DataInfo</h1>
+      <h1 className="text-3xl font-bold mb-6">{agentSymbol ? `${agentSymbol} DataInfo` : "DataInfo"}</h1>
       <div className="mb-6 flex space-x-4">
         <Input
           type="text"

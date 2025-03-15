@@ -20,9 +20,7 @@ export function StickyNav() {
     { name: "Market", href: "/" },
     { name: "Create", href: "/create" },
     { name: "Dashboard", href: "/dashboard" },
-    { name: "TradeGPT", href: "/tradegpt" },
-    { name: "DataInfo", href: "/datainfo" },
-    { name: "Livestream", href: "/livestream" },
+    // Removed: TradeGPT, DataInfo, Livestream
   ]
 
   const truncateAddress = (address: string) => {
