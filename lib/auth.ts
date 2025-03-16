@@ -65,13 +65,16 @@ async function verifyToken(request?: Request | NextRequest): Promise<TokenPayloa
 
     // If no token in header, try both cookie names
     if (!token) {
-      const cookieStore = await cookies()
+      const cookieStore = cookies()
       token = cookieStore.get("authToken")?.value || cookieStore.get("token")?.value
     }
 
     if (!token) {
+      console.log("No token found in cookies or headers")
       return null
     }
+
+    console.log("Token found, verifying...")
 
     // Verify the token
     const secret = new TextEncoder().encode(process.env.JWT_SECRET)
@@ -86,6 +89,7 @@ async function verifyToken(request?: Request | NextRequest): Promise<TokenPayloa
       exp: payload.exp,
     }
 
+    console.log("Token verified for user:", tokenPayload.email)
     return tokenPayload
   } catch (error) {
     console.error("Token verification failed:", error)
@@ -99,12 +103,12 @@ async function verifyToken(request?: Request | NextRequest): Promise<TokenPayloa
  * @returns User payload if authenticated, null if not authenticated
  */
 export const auth = async (request: Request | NextRequest): Promise<TokenPayload | null> => {
-  const user = await verifyToken(request)
-
-  if (!user) {
+  try {
+    const user = await verifyToken(request)
+    return user
+  } catch (error) {
+    console.error("Auth middleware error:", error)
     return null
   }
-
-  return user
 }
 

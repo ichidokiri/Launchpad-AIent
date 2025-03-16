@@ -1,11 +1,14 @@
 "use server"
 
 import { cookies } from "next/headers"
+import { SignJWT } from "jose"
+import { db } from "@/lib/db"
+import bcrypt from "bcryptjs"
 import { signToken } from "@/lib/jwt"
 import { prisma } from "@/lib/db"
 import { sendVerificationEmail } from "@/lib/email"
 import type { TokenPayload } from "@/types/auth"
-import { hash, compare } from "bcryptjs"
+import { hash } from "bcryptjs"
 import { z } from "zod"
 
 /**
@@ -23,45 +26,81 @@ function generateVerificationCode(): string {
 }
 
 /**
- * Logs in a user with email and password
+ * Login user with email and password
+ * @param email User email
+ * @param password User password
+ * @returns Success status and user data or error message
  */
 export async function loginUser(email: string, password: string) {
+  console.log(`Attempting login for email: ${email}`)
+
   try {
-    const user = await prisma.user.findUnique({ where: { email } })
+    // Find the user by email
+    const user = await db.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        password: true,
+        role: true,
+        monadBalance: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        username: true,
+      },
+    })
+
     if (!user) {
-      return { success: false, message: "User not found. Please register first." }
+      console.log(`User not found: ${email}`)
+      return { success: false, message: "Invalid email or password" }
     }
 
-    const isValidPassword = await compare(password, user.password)
-    if (!isValidPassword) {
-      return { success: false, message: "Invalid credentials" }
+    // Compare passwords
+    const validPassword = await bcrypt.compare(password, user.password)
+    if (!validPassword) {
+      console.log(`Invalid password for user: ${email}`)
+      return { success: false, message: "Invalid email or password" }
     }
 
-    const tokenPayload: TokenPayload = {
-      id: user.id.toString(),
+    // Create a JWT token
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET)
+    const token = await new SignJWT({
+      id: user.id,
       email: user.email,
-      role: user.role === "USER" ? "user" : "admin",
-    }
+      role: user.role,
+    })
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime("24h")
+      .sign(secret)
 
-    const authToken = await signToken(tokenPayload)
-    if (authToken) {
-      // Use await with cookies()
-      const cookieStore = await cookies()
-      cookieStore.set("authToken", authToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60, // 7 days
-        path: "/",
-      })
+    // Clear any existing cookies first
+    cookies().delete("authToken")
+    cookies().delete("token")
 
-      return { success: true, user: tokenPayload }
-    }
+    // Set the JWT token in a cookie
+    cookies().set({
+      name: "authToken",
+      value: token,
+      httpOnly: true,
+      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24, // 1 day
+      sameSite: "lax",
+    })
 
-    return { success: false, message: "Authentication failed" }
+    // Return user data (excluding password)
+    const { password: _, ...userData } = user
+
+    console.log(`Login successful for user: ${email}`)
+    return { success: true, user: userData }
   } catch (error) {
     console.error("Login error:", error)
-    return { success: false, message: "An unexpected error occurred" }
+    return {
+      success: false,
+      message: "An error occurred during login",
+    }
   }
 }
 

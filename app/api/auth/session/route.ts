@@ -1,19 +1,42 @@
-export const dynamic = "force-dynamic"
-
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 
-export async function GET(req: Request) {
+export const dynamic = "force-dynamic"
+
+export async function GET(request: Request) {
   try {
-    const user = await auth(req)
+    console.log("Session API route called")
+    const user = await auth(request)
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      console.log("No authenticated user found")
+      return NextResponse.json(
+        { user: null },
+        {
+          status: 200,
+          headers: {
+            "Cache-Control": "no-store, max-age=0, must-revalidate",
+            Pragma: "no-cache",
+            Expires: "0",
+          },
+        },
+      )
     }
 
-    return NextResponse.json({ user })
+    console.log("Authenticated user found:", user.email)
+    return NextResponse.json(
+      { user },
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "no-store, max-age=0, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      },
+    )
   } catch (error) {
-    console.error("Session error:", error)
+    console.error("Error in session API:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

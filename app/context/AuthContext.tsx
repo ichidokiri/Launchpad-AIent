@@ -3,7 +3,7 @@
 import type React from "react"
 import { createContext, useContext, useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import type { UserRole } from "@/lib/auth" // Import from lib/auth instead of types/auth
+import type { UserRole } from "@/lib/auth"
 import toast from "react-hot-toast"
 
 /**
@@ -12,7 +12,7 @@ import toast from "react-hot-toast"
 interface User {
   id: string
   email: string
-  role: UserRole | string // Allow both enum and string for flexibility
+  role: UserRole | string
   username?: string
   status?: string
   monadBalance?: number
@@ -35,7 +35,7 @@ interface AuthState {
  */
 interface AuthContextType {
   user: User | null
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>
   logout: () => Promise<void>
   refreshUser: () => Promise<User | null>
   error: string | null
@@ -46,7 +46,7 @@ interface AuthContextType {
 // Create the auth context with default values
 export const AuthContext = createContext<AuthContextType>({
   user: null,
-  login: async () => {},
+  login: async () => ({ success: false }),
   logout: async () => {},
   refreshUser: async () => null,
   error: null,
@@ -62,17 +62,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({
     user: null,
     error: null,
-    isLoading: true, // Start with loading true to prevent flash of unauthenticated content
+    isLoading: true,
     isInitialized: false,
   })
   const router = useRouter()
 
-  // Update the checkAuth function to be more robust and add it to the dependency array of useEffect
-  // Also add a refreshUser function that can be called after login
-
-  // Replace the checkAuth function with this improved version:
+  // Improved checkAuth function
   const checkAuth = useCallback(async () => {
     try {
+      console.log("Checking auth status...")
       setState((prev) => ({ ...prev, isLoading: true }))
 
       // Add a timeout to prevent hanging
@@ -80,13 +78,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setTimeout(() => reject(new Error("Auth check timed out")), 5000),
       )
 
-      const fetchPromise = fetch("/api/auth/session")
+      const fetchPromise = fetch("/api/auth/session", {
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      })
 
       // Race between the fetch and the timeout
       const response = (await Promise.race([fetchPromise, timeoutPromise])) as Response
 
       if (!response.ok) {
-        // If not authorized, just set user to null without showing an error
+        console.log("Auth check failed with status:", response.status)
         setState((prev) => ({
           ...prev,
           user: null,
@@ -97,8 +101,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const data = await response.json()
+      console.log("Auth check response:", data)
 
       if (data.user) {
+        console.log("User is authenticated:", data.user.email)
         setState((prev) => ({
           ...prev,
           user: data.user,
@@ -107,6 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }))
         return data.user
       } else {
+        console.log("No user in auth check response")
         setState((prev) => ({
           ...prev,
           user: null,
@@ -127,25 +134,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Check for existing session on mount
+  // Initial auth check on mount
   useEffect(() => {
     checkAuth()
   }, [checkAuth])
 
-  // Update the login function to properly update state and navigate
-  const login = async (email: string, password: string) => {
-    setState((prev) => ({ ...prev, isLoading: true }))
+  // Improved login function
+  const login = async (email: string, password: string): Promise<{ success: boolean; message?: string }> => {
+    setState((prev) => ({ ...prev, isLoading: true, error: null }))
     try {
+      console.log(`Attempting to login user: ${email}`)
+
       const response = await fetch("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
         body: JSON.stringify({ email, password }),
+        cache: "no-store",
       })
 
       const data = await response.json()
+      console.log("Login response:", data)
 
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed")
+      if (!response.ok || !data.success) {
+        const errorMessage = data.message || "Login failed"
+        console.error("Login error:", errorMessage)
+        setState((prev) => ({
+          ...prev,
+          error: errorMessage,
+          isLoading: false,
+        }))
+        toast.error(errorMessage)
+        return { success: false, message: errorMessage }
       }
 
       // Update state with user data
@@ -161,34 +185,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Force a refresh of the auth state after login
       await checkAuth()
 
+      // Only navigate after successful login and state update
       router.push("/dashboard")
+      return { success: true }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Login failed"
+      console.error("Login error:", error)
       setState((prev) => ({
         ...prev,
-        error: error instanceof Error ? error.message : "Login failed",
+        error: errorMessage,
         isLoading: false,
       }))
-      toast.error(error instanceof Error ? error.message : "Login failed")
+      toast.error(errorMessage)
+      return { success: false, message: errorMessage }
     }
   }
 
-  /**
-   * Logs out the current user
-   */
+  // Improved logout function
   const logout = useCallback(async () => {
     try {
+      console.log("Logging out user...")
       setState((prev) => ({ ...prev, isLoading: true }))
+
       const response = await fetch("/api/auth/logout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
         },
+        cache: "no-store",
       })
 
       if (!response.ok) {
         throw new Error("Logout failed")
       }
 
+      // Clear user state immediately
       setState((prev) => ({
         ...prev,
         user: null,
@@ -196,8 +230,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading: false,
       }))
 
+      // Clear any localStorage items if used
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("user")
+      }
+
       toast.success("Logged out successfully")
-      router.push("/login")
+
+      // Add a small delay before redirecting
+      setTimeout(() => {
+        router.push("/login")
+        // Force a router refresh
+        router.refresh()
+      }, 100)
     } catch (error) {
       console.error("Logout failed:", error)
       setState((prev) => ({
@@ -214,7 +259,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return await checkAuth()
   }, [checkAuth])
 
-  // Update the AuthContext.Provider value to include refreshUser
   return (
     <AuthContext.Provider
       value={{

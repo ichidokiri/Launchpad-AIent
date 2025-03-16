@@ -13,6 +13,15 @@ const nextConfig = {
     // This will allow the build to succeed even with ESLint errors
     ignoreDuringBuilds: true,
   },
+  // Add this to handle potential webpack issues
+  webpack: (config, { isServer }) => {
+    // Fix for potential issues with the build process
+    config.infrastructureLogging = {
+      level: "error",
+    };
+    
+    return config;
+  },
 }
 
 export default nextConfig

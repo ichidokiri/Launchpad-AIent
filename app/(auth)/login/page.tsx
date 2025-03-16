@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useContext } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
@@ -10,7 +10,7 @@ import toast from "react-hot-toast"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { AuthContext } from "@/context/AuthContext"
+import { useAuth } from "@/app/context/AuthContext"
 
 /**
  * Login page component
@@ -24,7 +24,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  const { login, user } = useContext(AuthContext)
+  const { login, user, isInitialized } = useAuth()
 
   // Check for expired token or auth error
   useEffect(() => {
@@ -38,15 +38,13 @@ export default function LoginPage() {
     }
   }, [searchParams])
 
-  // Add a useEffect to check auth state after successful login
-
-  // Add this useEffect to the component
+  // Redirect if already logged in
   useEffect(() => {
-    if (user) {
+    if (isInitialized && user) {
       console.log("Login page: User is already logged in, redirecting to dashboard")
       router.push("/dashboard")
     }
-  }, [user, router])
+  }, [user, router, isInitialized])
 
   /**
    * Handles form submission
@@ -57,12 +55,52 @@ export default function LoginPage() {
     setIsLoading(true)
     setError("")
 
+    // Client-side validation
+    if (!email.trim()) {
+      setError("Email is required")
+      setIsLoading(false)
+      return
+    }
+
+    if (!password.trim()) {
+      setError("Password is required")
+      setIsLoading(false)
+      return
+    }
+
     try {
-      await login(email, password)
-      // The login function in AuthContext will handle the state update and navigation
+      console.log(`Submitting login for ${email}`)
+
+      // Direct API call instead of using the context
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        toast.success("Login successful!")
+
+        // Force a refresh of the auth state
+        setTimeout(() => {
+          router.push("/dashboard")
+          router.refresh()
+        }, 500)
+      } else {
+        setError(data.message || "Login failed")
+        toast.error(data.message || "Login failed")
+      }
     } catch (err) {
       console.error("Login error:", err)
       setError(err instanceof Error ? err.message : "Login failed")
+      toast.error("An unexpected error occurred. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -116,7 +154,7 @@ export default function LoginPage() {
                 </button>
               </div>
 
-              {error && <p className="text-red-500">{error}</p>}
+              {error && <p className="text-red-500 text-sm">{error}</p>}
 
               <Button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                 {isLoading ? (
@@ -147,14 +185,4 @@ export default function LoginPage() {
     </div>
   )
 }
-
-// This file contains the complete login functionality:
-// - Email and password inputs
-// - Form validation
-// - Login submission
-// - Error handling
-// - Loading states
-// - Links to forgot password and registration
-
-// The login page is accessible at /login
 

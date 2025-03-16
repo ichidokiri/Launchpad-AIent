@@ -4,31 +4,30 @@
  */
 import { PrismaClient } from "@prisma/client"
 
-// Declare global variable for PrismaClient to enable singleton pattern
+// Prevent multiple instances of Prisma Client in development
 declare global {
   var prisma: PrismaClient | undefined
 }
 
-// Create a singleton instance of PrismaClient
-let prismaInstance: PrismaClient
+// Use a simplified approach to avoid build issues
+export const prisma = global.prisma || new PrismaClient()
 
-// In production, create a new instance
-// In development, reuse the global instance to prevent multiple connections
-if (process.env.NODE_ENV === "production") {
-  prismaInstance = new PrismaClient({
-    log: ["query", "error", "warn"], // Enable logging in production too for debugging
-  })
-} else {
-  if (!global.prisma) {
-    global.prisma = new PrismaClient({
-      log: ["query", "error", "warn"], // Enable logging in development
-    })
-  }
-  prismaInstance = global.prisma
+if (process.env.NODE_ENV !== "production") {
+  global.prisma = prisma
 }
 
-// Export the prisma instance that is guaranteed to be defined
-export const prisma = prismaInstance
+// Simple function to check if a user exists
+export async function userExists(userId: string): Promise<boolean> {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    })
+    return !!user
+  } catch (error) {
+    console.error("Error checking if user exists:", error)
+    return false
+  }
+}
 
 /**
  * Safely disconnects from the database
@@ -36,7 +35,9 @@ export const prisma = prismaInstance
  */
 export async function disconnectDb(): Promise<void> {
   try {
-    await prisma.$disconnect()
+    if (prisma) {
+      await prisma.$disconnect()
+    }
   } catch (error) {
     console.error("Error disconnecting from database:", error)
   }
@@ -49,12 +50,13 @@ export async function disconnectDb(): Promise<void> {
  */
 export async function withDb<T>(operation: () => Promise<T>): Promise<T> {
   try {
+    if (!prisma) {
+      throw new Error("PrismaClient is not initialized")
+    }
     return await operation()
   } catch (error) {
     console.error("Database operation error:", error)
     throw error
-  } finally {
-    // No need to disconnect here as we're using a singleton
   }
 }
 
@@ -64,31 +66,14 @@ export async function withDb<T>(operation: () => Promise<T>): Promise<T> {
  */
 export async function checkDbConnection(): Promise<boolean> {
   try {
-    // Execute a simple query to check connection
+    if (!prisma) {
+      console.error("PrismaClient is not initialized")
+      return false
+    }
     await prisma.$queryRaw`SELECT 1`
     return true
   } catch (error) {
     console.error("Database connection check failed:", error)
-    return false
-  }
-}
-
-// Add a new utility function to check if a user exists before creating related records
-
-/**
- * Checks if a user exists by ID
- * @param userId - The user ID to check
- * @returns True if the user exists, false otherwise
- */
-export async function userExists(userId: string): Promise<boolean> {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true },
-    })
-    return !!user
-  } catch (error) {
-    console.error("Error checking if user exists:", error)
     return false
   }
 }

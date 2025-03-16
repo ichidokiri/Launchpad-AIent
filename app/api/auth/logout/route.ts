@@ -6,10 +6,24 @@ import { cookies } from "next/headers"
 export async function POST() {
   try {
     // Clear the auth token cookie - properly await cookies()
-    const cookieStore = await cookies()
-    cookieStore.delete("authToken")
+    const cookieStore = cookies()
 
-    return NextResponse.json({ success: true, message: "Logged out successfully" })
+    // Delete both possible cookie names to ensure complete logout
+    cookieStore.delete("authToken")
+    cookieStore.delete("token")
+
+    // Set proper cache control headers to prevent caching
+    return NextResponse.json(
+      { success: true, message: "Logged out successfully" },
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "no-store, max-age=0, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      },
+    )
   } catch (error) {
     console.error("Logout error:", error)
     return NextResponse.json(
