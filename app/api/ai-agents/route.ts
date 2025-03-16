@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-import { verifyAuth } from "@/lib/auth"
+import { auth } from "@/lib/auth" // Changed from verifyAuth to auth
 
 export async function GET(request: NextRequest) {
   try {
@@ -56,8 +56,8 @@ export async function POST(request: NextRequest) {
   try {
     console.log("POST /api/ai-agents - Received request")
 
-    // Authenticate user
-    const authResult = await verifyAuth(request)
+    // Authenticate user - Changed from verifyAuth to auth
+    const authResult = await auth(request)
     console.log("Auth result:", authResult)
 
     if (!authResult) {
@@ -88,19 +88,23 @@ export async function POST(request: NextRequest) {
         data: {
           name: body.name,
           symbol: body.symbol,
-          price: body.price,
-          tokenAmount: body.tokenAmount,
+          price: Number.parseFloat(body.price),
+          marketCap: Number.parseFloat(body.price) * Number.parseFloat(body.tokenAmount),
           description: body.description || "",
-          avatar: body.avatar || "",
-          contractAddress: body.contractAddress || "",
-          socialLinks: body.socialLinks || {},
-          creator: {
-            connect: { id: userId },
-          },
+          logo: body.avatar || null,
+          creatorId: userId,
+          model: body.model || "gpt-3.5-turbo",
+          systemPrompt: body.systemPrompt || "You are a helpful assistant.",
+          category: body.category || "general",
+          isPublic: body.isPublic || false,
         },
       })
 
-      return NextResponse.json({ agent })
+      return NextResponse.json({
+        success: true,
+        message: "AI agent created successfully",
+        agent,
+      })
     } catch (error) {
       console.error("Error creating agent:", error)
 
@@ -110,27 +114,43 @@ export async function POST(request: NextRequest) {
           data: {
             name: body.name,
             symbol: body.symbol,
-            price: body.price,
-            tokenAmount: body.tokenAmount,
+            price: Number.parseFloat(body.price),
+            marketCap: Number.parseFloat(body.price) * Number.parseFloat(body.tokenAmount),
             description: body.description || "",
-            avatar: body.avatar || "",
-            contractAddress: body.contractAddress || "",
-            socialLinks: body.socialLinks || {},
-            creator: {
-              connect: { id: userId },
-            },
+            logo: body.avatar || null,
+            creatorId: userId,
+            model: body.model || "gpt-3.5-turbo",
+            systemPrompt: body.systemPrompt || "You are a helpful assistant.",
+            category: body.category || "general",
+            isPublic: body.isPublic || false,
           },
         })
 
-        return NextResponse.json({ agent })
+        return NextResponse.json({
+          success: true,
+          message: "AI agent created successfully",
+          agent,
+        })
       } catch (altError) {
         console.error("Error creating agent with alternative model name:", altError)
-        return NextResponse.json({ error: "Failed to create agent" }, { status: 500 })
+        return NextResponse.json(
+          {
+            error: "Failed to create agent",
+            message: altError instanceof Error ? altError.message : String(altError),
+          },
+          { status: 500 },
+        )
       }
     }
   } catch (error) {
     console.error("Error in POST /api/ai-agents:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+        message: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 },
+    )
   }
 }
 

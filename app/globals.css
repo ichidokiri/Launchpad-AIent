@@ -43,7 +43,7 @@ body {
 
 .grid-background {
   background-image: linear-gradient(to right, hsla(var(--grid-color), 0.1) 1px, transparent 1px),
-  linear-gradient(to bottom, hsla(var(--grid-color), 0.1) 1px, transparent 1px);
+    linear-gradient(to bottom, hsla(var(--grid-color), 0.1) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
