@@ -12,7 +12,7 @@ import ReactMarkdown from "react-markdown"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 // Add the BASE_URL constant
-const BASE_URL = "http://140.112.29.197:13579"
+const BASE_URL = "https://140.112.29.197:13579"
 
 // Define a type for the article objects
 interface Article {

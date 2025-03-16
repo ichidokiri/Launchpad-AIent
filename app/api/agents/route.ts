@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
     }
 
     console.log("Prisma query:", JSON.stringify(query, null, 2))
+    console.log("Attempting database connection with URL:", process.env.DATABASE_URL ? "URL exists" : "URL missing")
 
     // Try to fetch agents
     try {
@@ -35,6 +36,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ agents })
     } catch (error) {
       console.error("Error fetching agents:", error)
+
+      // Check if this is a connection error
+      if (error.message && error.message.includes("Can't reach database server")) {
+        return NextResponse.json(
+          {
+            error: "Database connection failed",
+            details: "Please check your database connection settings and ensure the database server is running.",
+            url: process.env.DATABASE_URL ? "Database URL is configured" : "Database URL is missing",
+          },
+          { status: 500 },
+        )
+      }
 
       // Try alternative model name
       try {

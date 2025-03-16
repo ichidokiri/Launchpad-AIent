@@ -61,7 +61,6 @@
     "prisma": "latest",
     "ws": "latest",
     "react-hot-toast": "latest",
-    "react-markdown": "latest",
     "jose": "latest",
     "crypto": "latest",
     "bcryptjs": "latest",
@@ -70,7 +69,9 @@
     "fs": "latest",
     "path": "latest",
     "openai": "latest",
-    "react-syntax-highlighter": "latest"
+    "react-markdown": "latest",
+    "react-syntax-highlighter": "latest",
+    "dotenv": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",
