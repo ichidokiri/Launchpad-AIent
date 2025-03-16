@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,85 +8,84 @@ datasource db {
 }
 
 model User {
-  id              String            @id @default(cuid())
-  username        String?           @unique
-  email           String            @unique
-  password        String
-  role            String            @default("USER") // USER, ADMIN, SUPERADMIN
-  status          String?           @default("active") // active, inactive, pending
-  monadBalance    Float?            @default(0)
-  image           String?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  agents          AIAgent[]
+  id                String             @id @default(cuid())
+  email             String             @unique
+  username          String?            @unique
+  password          String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  image             String?
+  monadBalance      Float?             @default(0)
+  role              String             @default("USER")
+  status            String?            @default("active")
+  agents            AIAgent[]
+  interactions      Interaction[]
+  tokens            Token[]
   verificationCodes VerificationCode[]
-  tokens          Token[]
-  interactions    Interaction[]
 }
 
 model AIAgent {
-  id              String            @id @default(cuid())
+  id              String        @id @default(cuid())
   name            String
-  description     String?
-  model           String            @default("gpt-3.5-turbo")
-  systemPrompt    String?           @db.Text
-  category        String            @default("Other")
-  isPublic        Boolean           @default(false)
-  price           Float             @default(0)
-  creatorId       String
-  creator         User              @relation(fields: [creatorId], references: [id])
-  logo            String?
-  contractAddress String?
   symbol          String
-  marketCap       Float             @default(0)
-  totalSupply     Float?
+  description     String?
+  price           Float         @default(0)
+  marketCap       Float         @default(0)
+  logo            String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  creatorId       String
+  category        String        @default("Other")
+  contractAddress String?
   holders         Int?
-  verified        Boolean?          @default(false)
-  status          String?           @default("active") // active, pending, paused
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  purchases       Purchase[]
+  isPublic        Boolean       @default(false)
+  model           String        @default("gpt-3.5-turbo")
+  status          String?       @default("active")
+  systemPrompt    String?
+  totalSupply     Float?
+  verified        Boolean?      @default(false)
+  creator         User          @relation(fields: [creatorId], references: [id])
   interactions    Interaction[]
+  purchases       Purchase[]
 }
 
 model VerificationCode {
-  id              String            @id @default(cuid())
-  email           String
-  code            String
-  expiresAt       DateTime
-  used            Boolean           @default(false)
-  createdAt       DateTime          @default(now())
-  user            User?             @relation(fields: [email], references: [email])
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [email], references: [email])
 }
 
 model Token {
-  id              String            @id @default(cuid())
-  userId          String
-  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token           String            @unique
-  type            String            // refresh, access, etc.
-  expiresAt       DateTime
-  createdAt       DateTime          @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  type      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Purchase {
-  id              String            @id @default(cuid())
-  agentId         String
-  agent           AIAgent           @relation(fields: [agentId], references: [id])
-  userId          String
-  amount          Float
-  createdAt       DateTime          @default(now())
+  id        String   @id @default(cuid())
+  agentId   String
+  userId    String
+  amount    Float
+  createdAt DateTime @default(now())
+  agent     AIAgent  @relation(fields: [agentId], references: [id])
 }
 
 model Interaction {
-  id              String            @id @default(cuid())
-  userId          String
-  user            User              @relation(fields: [userId], references: [id])
-  agentId         String
-  agent           AIAgent           @relation(fields: [agentId], references: [id])
-  type            String            // chat, feedback, etc.
-  content         String?           @db.Text
-  rating          Int?
-  createdAt       DateTime          @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  agentId   String
+  type      String
+  content   String?
+  rating    Int?
+  createdAt DateTime @default(now())
+  agent     AIAgent  @relation(fields: [agentId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 }
-
