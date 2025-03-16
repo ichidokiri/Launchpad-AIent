@@ -1,18 +1,19 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, RefreshCw } from "lucide-react"
+import { ArrowLeft, RefreshCw, Trash2, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2 } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 // Add the BASE_URL constant
-const BASE_URL = "https://140.112.29.197:13579"
+const BASE_URL = "http://140.112.29.197:13579"
 
 // Define a type for the article objects
 interface Article {
@@ -22,6 +23,7 @@ interface Article {
   topic: string
   agentSymbol?: string
   date?: string
+  isDefault?: boolean // Add this flag to identify default articles
 }
 
 // Define the ChatMessage interface
@@ -54,7 +56,7 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
 }
 
 // Improved mock data for articles with higher quality content
-const mockArticles: Article[] = [
+const defaultMockArticles: Article[] = [
   {
     id: 1,
     title: "Understanding Market Patterns",
@@ -86,6 +88,7 @@ Patterns observed on higher timeframes (daily, weekly) typically carry more sign
 While patterns offer valuable insights, they should never be used in isolation. Implementing proper risk management strategies, including stop-loss orders and position sizing, remains essential for protecting capital during unexpected market movements.`,
     topic: "analysis",
     date: "2023-11-15",
+    isDefault: true,
   },
   {
     id: 2,
@@ -148,6 +151,7 @@ The most sophisticated strategy will fail without proper psychological preparati
 - Conducting regular performance reviews to identify improvement areas`,
     topic: "trading",
     date: "2023-12-03",
+    isDefault: true,
   },
   {
     id: 3,
@@ -222,6 +226,7 @@ Advanced algorithms uncover non-linear relationships:
 6. Continuously monitor and refine the approach`,
     topic: "data analysis",
     date: "2024-01-20",
+    isDefault: true,
   },
 ]
 
@@ -254,6 +259,7 @@ export default function AgentDataInfoPage() {
   const [agentSymbol, setAgentSymbol] = useState<string | null>(null)
   const [agentName, setAgentName] = useState<string | null>(null)
   const [agentArticles, setAgentArticles] = useState<Article[]>([])
+  const [mockArticles, setMockArticles] = useState<Article[]>(defaultMockArticles)
   const [isLoading, setIsLoading] = useState(false)
   const [newArticle, setNewArticle] = useState<Article | null>(null)
   const [showArticleDialog, setShowArticleDialog] = useState(false)
@@ -275,8 +281,16 @@ export default function AgentDataInfoPage() {
           const cachedArticles = localStorage.getItem(`agent-${agentId}-articles`)
           if (cachedArticles) {
             setAgentArticles(JSON.parse(cachedArticles))
+          }
+
+          // Check if we have cached mock articles
+          const cachedMockArticles = localStorage.getItem(`mock-articles`)
+          if (cachedMockArticles) {
+            setMockArticles(JSON.parse(cachedMockArticles))
             return // Skip API call if we have cached data
           }
+
+          return // Skip API call if we have cached agent data
         }
 
         // If no cached data, fetch from API
@@ -590,6 +604,11 @@ For investors, ${data.agent.symbol} represents a ${Math.random() > 0.5 ? "higher
 
         // Store agent articles in localStorage for persistence
         localStorage.setItem(`agent-${agentId}-articles`, JSON.stringify(generatedArticles))
+
+        //  JSON.stringify(generatedArticles))
+
+        // Store mock articles in localStorage for persistence
+        localStorage.setItem(`mock-articles`, JSON.stringify(defaultMockArticles))
       } catch (error) {
         console.error("Error fetching agent details:", error)
       }
@@ -607,6 +626,14 @@ For investors, ${data.agent.symbol} represents a ${Math.random() > 0.5 ? "higher
     agentSymbol?: string | null,
   ): Promise<string> => {
     try {
+      console.log("Enhancing content with OpenAI, content length:", content?.length || 0)
+
+      // Validate content before sending to API
+      if (!content || content.trim() === "") {
+        console.error("Content is empty or undefined")
+        return content || "" // Return original content if it's empty
+      }
+
       const response = await fetch("/api/enhance-content", {
         method: "POST",
         headers: {
@@ -616,15 +643,25 @@ For investors, ${data.agent.symbol} represents a ${Math.random() > 0.5 ? "higher
           content,
           agentName,
           agentSymbol,
-          task: "Enhance this cryptocurrency article with more detailed analysis, professional language, and better structure. Add sections on technical analysis, fundamental outlook, and market sentiment if they don't exist. Format with proper markdown.",
+          task: "Create an engaging and creative article that could be about any topic related to finance, technology, culture, or future trends. Feel free to be imaginative and explore interesting concepts. Format with proper markdown and include multiple sections.",
         }),
       })
 
+      // Log the response status
+      console.log(`OpenAI API response status: ${response.status}`)
+
       if (!response.ok) {
-        throw new Error("Failed to enhance content")
+        const errorText = await response.text().catch(() => "")
+        console.error(`API error (${response.status}): ${errorText}`)
+        throw new Error(`Failed to enhance content: ${response.status} ${errorText}`)
       }
 
       const data = await response.json()
+      if (!data.enhancedContent) {
+        console.error("API returned no enhanced content:", data)
+        throw new Error("API returned no enhanced content")
+      }
+
       return data.enhancedContent
     } catch (error) {
       console.error("Error enhancing content with OpenAI:", error)
@@ -636,8 +673,24 @@ For investors, ${data.agent.symbol} represents a ${Math.random() > 0.5 ? "higher
   // Function to send topic to external API and generate article
   const sendTopic = async (): Promise<string> => {
     try {
-      // Create a topic based on the agent
-      const topic = `Write a comprehensive article about ${agentName || "cryptocurrency"} (${agentSymbol || "crypto"}) focusing on recent market trends, technical analysis, and investment outlook.`
+      // Create a more creative topic that's not necessarily related to the agent
+      const topics = [
+        `Write about the intersection of blockchain technology and art`,
+        `Explore the future of decentralized finance beyond cryptocurrencies`,
+        `Discuss how emerging technologies might reshape society in the next decade`,
+        `Analyze the psychological aspects of trading and investment decisions`,
+        `Examine the cultural impact of digital assets and virtual ownership`,
+        `Explore the concept of value in digital and physical economies`,
+        `Write about the evolution of trust in financial systems`,
+        `Discuss the environmental considerations of blockchain technology`,
+        `Analyze how AI and blockchain might converge in the future`,
+        `Explore the philosophical implications of decentralized systems`,
+      ]
+
+      // Select a random topic
+      const topic = topics[Math.floor(Math.random() * topics.length)]
+
+      console.log(`Sending topic to external API at ${BASE_URL}/content:`, topic)
 
       // Send the topic to the external API
       const response = await fetch(`${BASE_URL}/content`, {
@@ -647,17 +700,144 @@ For investors, ${data.agent.symbol} represents a ${Math.random() > 0.5 ? "higher
         body: JSON.stringify(topic),
       })
 
+      console.log(`External API response status: ${response.status}`)
+
       if (!response.ok) {
         const errorMsg = await response.text().catch(() => "")
         throw new Error(`Request failed with status ${response.status}\n${errorMsg}`)
       }
 
-      // Parse the response
-      const data = await response.json()
-      return data.response || "" // Return the response content
+      // Get the raw response text first for debugging
+      const responseText = await response.text()
+      console.log("Raw API response:", responseText)
+
+      // Try to parse the response as JSON
+      let data
+      try {
+        data = JSON.parse(responseText)
+        console.log("Parsed API response:", data)
+      } catch (parseError) {
+        console.error("Failed to parse API response as JSON:", parseError)
+        // If it's not valid JSON but has content, return the raw text
+        if (responseText && responseText.trim().length > 0) {
+          return responseText
+        }
+        throw new Error("API response is not valid JSON and contains no usable content")
+      }
+
+      // Check if the response has the expected structure
+      if (data && data.response) {
+        return data.response
+      } else if (data && typeof data === "string" && data.trim().length > 0) {
+        // If the API returned a string directly
+        return data
+      } else if (data && Object.keys(data).length > 0) {
+        // If there's some other data structure, try to extract useful content
+        console.log("API returned unexpected data structure:", data)
+        // Try to find any property that might contain the content
+        for (const key of Object.keys(data)) {
+          if (typeof data[key] === "string" && data[key].trim().length > 50) {
+            console.log(`Using content from '${key}' property`)
+            return data[key]
+          }
+        }
+
+        // If we can't find a suitable property, stringify the whole response
+        return JSON.stringify(data, null, 2)
+      }
+
+      // If we get here, we couldn't find any usable content
+      throw new Error("External API returned no usable content")
     } catch (error) {
       console.error("Error sending topic to external API:", error)
-      throw error // Re-throw to handle in the calling function
+
+      // Create a fallback article content with creative topics
+      const fallbackTopics = [
+        {
+          title: "The Digital Renaissance: How Blockchain is Transforming Creative Industries",
+          content: `# The Digital Renaissance: How Blockchain is Transforming Creative Industries
+
+## A New Era for Creators
+
+The intersection of blockchain technology and creative industries is ushering in what many are calling a Digital Renaissance. Artists, musicians, writers, and other creators are discovering unprecedented opportunities to monetize their work, connect directly with their audiences, and establish verifiable ownership of digital assets.
+
+## Beyond the NFT Hype
+
+While non-fungible tokens (NFTs) captured headlines with multi-million dollar sales, the true revolution lies in the underlying infrastructure that blockchain provides. Smart contracts enable automatic royalty payments, giving creators ongoing revenue streams from secondary sales—something previously impossible in digital markets.
+
+## Community Ownership Models
+
+Decentralized autonomous organizations (DAOs) are enabling new forms of collective ownership and decision-making in creative projects. From community-owned music labels to collaborative film productions, these models are challenging traditional gatekeepers and funding structures.
+
+## Challenges and Considerations
+
+Despite the promise, questions remain about environmental impact, accessibility, and long-term sustainability. The technology continues to evolve, with layer-2 solutions and alternative consensus mechanisms addressing many early concerns.
+
+## The Future Canvas
+
+As these technologies mature, we're likely to see entirely new art forms emerge—interactive, evolving pieces that respond to ownership, community input, or external data. The canvas of possibility continues to expand, limited only by creative imagination and technical innovation.`,
+        },
+        {
+          title: "The Psychology of Digital Scarcity",
+          content: `# The Psychology of Digital Scarcity
+
+## Reimagining Value in an Age of Abundance
+
+In a digital world where perfect copies can be created instantly at zero marginal cost, blockchain technology has introduced something previously thought impossible: digital scarcity. This fundamental shift is changing how we perceive value in virtual spaces and challenging our understanding of ownership.
+
+## The Collector's Mindset
+
+Humans have collected rare items throughout history—from ancient artifacts to vintage cars. Digital collectibles tap into these same psychological drivers: the thrill of the hunt, status signaling, community belonging, and the joy of curation. What's changed is merely the medium, not the underlying motivations.
+
+## Artificial Scarcity vs. Programmatic Scarcity
+
+Critics argue that digital scarcity is merely artificial—a technological enforcement of limitations that don't naturally exist in digital environments. Proponents counter that "programmatic scarcity" is no less real than other socially-constructed forms of value, from fiat currency to luxury fashion.
+
+## Identity and Digital Possessions
+
+As we spend more time in digital spaces, our virtual possessions increasingly form part of our identity. The ability to truly own digital assets—rather than merely license them from platforms—represents a profound shift in how we express ourselves online.
+
+## Beyond Speculation
+
+While speculative manias have dominated headlines, the long-term implications of digital scarcity extend far beyond price fluctuations. From digital land in virtual worlds to tokenized access to communities, we're witnessing the emergence of entirely new economic systems with their own rules and social norms.
+
+## The Abundance Paradox
+
+Perhaps most interestingly, digital scarcity exists alongside unprecedented abundance. The same technologies enabling verifiable ownership also facilitate permissionless creation and global distribution at scales previously unimaginable. Navigating this paradox will define the next era of digital culture.`,
+        },
+        {
+          title: "Decentralized Finance: Beyond Cryptocurrencies",
+          content: `# Decentralized Finance: Beyond Cryptocurrencies
+
+## Reimagining the Financial System
+
+Decentralized Finance (DeFi) represents one of the most transformative applications of blockchain technology, extending far beyond simple cryptocurrency transactions. By recreating traditional financial services without centralized intermediaries, DeFi is challenging centuries-old assumptions about how money moves through the global economy.
+
+## The Composability Revolution
+
+Often described as "money legos," DeFi protocols can be seamlessly combined in ways traditional financial services cannot. This composability enables rapid innovation and complex financial products that would be impossible in siloed traditional systems.
+
+## Global Access, Local Impact
+
+Perhaps the most profound promise of DeFi is expanding financial access to the estimated 1.7 billion adults worldwide without banking services. By requiring only an internet connection rather than identity documents or credit histories, these systems could enable economic participation at unprecedented scales.
+
+## Risks and Challenges
+
+The rapid evolution of DeFi brings significant risks: smart contract vulnerabilities, regulatory uncertainty, and complex user experiences remain substantial barriers. Critics also question whether these systems truly decentralize power or simply create new forms of concentration.
+
+## Beyond Currency: Real-World Assets
+
+The next frontier involves bringing real-world assets on-chain—from real estate and commodities to intellectual property and carbon credits. These developments could bridge the gap between digital and physical economies, creating entirely new markets and investment opportunities.
+
+## The Path Forward
+
+As these systems mature, they're likely to both challenge and complement traditional finance rather than wholly replacing it. The most promising future may be hybrid models that combine the efficiency and accessibility of decentralized systems with the stability and protections of regulated institutions.`,
+        },
+      ]
+
+      // Select a random fallback topic
+      const fallback = fallbackTopics[Math.floor(Math.random() * fallbackTopics.length)]
+      return fallback.content
     }
   }
 
@@ -668,17 +848,25 @@ For investors, ${data.agent.symbol} represents a ${Math.random() > 0.5 ? "higher
 
     try {
       // Step 1: Get initial content from the external API using sendTopic
+      console.log("Starting article generation process")
       const externalContent = await sendTopic()
+
+      if (!externalContent || externalContent.trim() === "") {
+        throw new Error("Received empty content from external API")
+      }
+
+      console.log("External content received, length:", externalContent.length)
 
       // Step 2: Enhance the content with OpenAI
       const enhancedContent = await enhanceWithOpenAI(externalContent, agentName, agentSymbol)
+      console.log("Content enhanced, final length:", enhancedContent.length)
 
       // Create a new article from the enhanced content
       const article: Article = {
         id: Date.now(), // Use timestamp as unique ID
-        title: `Latest ${agentSymbol || "Crypto"} Market Insights`,
+        title: generateCreativeTitle(),
         content: enhancedContent,
-        topic: "analysis",
+        topic: getRandomTopic(),
         agentSymbol: agentSymbol || undefined,
         date: new Date().toISOString().split("T")[0],
       }
@@ -693,32 +881,34 @@ For investors, ${data.agent.symbol} represents a ${Math.random() > 0.5 ? "higher
       setShowArticleDialog(true)
     } catch (error) {
       console.error("Error generating article:", error)
-      setGenerationError("Failed to generate article. Please try again later.")
+      setGenerationError(`Failed to generate article: ${error instanceof Error ? error.message : String(error)}`)
 
       // Create a fallback article if the API fails
       const fallbackArticle: Article = {
         id: Date.now(),
-        title: `Latest ${agentSymbol || "Crypto"} Market Analysis`,
-        content: `# Latest ${agentSymbol || "Crypto"} Market Analysis
+        title: generateCreativeTitle(),
+        content: `# ${generateCreativeTitle()}
 
-This article provides an in-depth analysis of ${agentName || "cryptocurrency"} (${agentSymbol || "crypto"}) based on current market conditions and technical indicators.
+## The Evolution of Digital Economies
 
-## Market Overview
+In the rapidly evolving landscape of digital economies, we're witnessing unprecedented transformations in how value is created, exchanged, and stored. From decentralized finance to tokenized assets, the boundaries between traditional and emerging markets continue to blur.
 
-${agentName || "This cryptocurrency"} has shown significant movement in recent trading sessions, with price action indicating a potential shift in market sentiment. Trading volume has fluctuated, suggesting varying levels of investor interest and participation.
+## Technological Convergence
 
-## Technical Analysis
+The convergence of blockchain, artificial intelligence, and extended reality technologies is creating entirely new possibilities for human interaction and economic activity. These systems are not merely digitizing existing processes but enabling fundamentally new forms of organization and collaboration.
 
-Recent price movements have established key support and resistance levels that traders should monitor closely. The current market structure suggests a possible continuation of the prevailing trend, though volatility remains a factor to consider in position sizing and risk management.
+## Cultural Implications
 
-## Fundamental Developments
+Beyond the technical infrastructure, we're experiencing profound cultural shifts in how people relate to digital assets, online communities, and virtual identities. The concept of ownership itself is being reimagined in ways that challenge conventional understanding.
 
-Recent project updates and ecosystem developments continue to influence the long-term outlook for ${agentSymbol || "this asset"}. Community engagement metrics and developer activity provide additional context for assessing fundamental strength.
+## Looking Forward
 
-## Outlook
+As these technologies mature and adoption increases, we can expect further disruption across industries ranging from finance and real estate to entertainment and education. The most successful participants will be those who can adapt to these changes while maintaining focus on creating genuine value.
 
-Market participants should remain vigilant of broader crypto market conditions while monitoring ${agentSymbol || "asset"}-specific indicators for potential trading opportunities. Risk management remains essential in navigating current market conditions.`,
-        topic: "analysis",
+## Navigating Complexity
+
+For individuals and organizations alike, navigating this complex landscape requires both technical understanding and philosophical clarity. The questions of what constitutes value, how trust is established, and who benefits from these systems will remain central to their development.`,
+        topic: getRandomTopic(),
         agentSymbol: agentSymbol || undefined,
         date: new Date().toISOString().split("T")[0],
       }
@@ -734,6 +924,29 @@ Market participants should remain vigilant of broader crypto market conditions w
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Helper function to generate creative titles
+  const generateCreativeTitle = (): string => {
+    const titles = [
+      "The Digital Horizon: Exploring Tomorrow's Economy",
+      "Beyond Bits and Blocks: The New Paradigm of Value",
+      "Decentralized Dreams: Reimagining Financial Systems",
+      "The Tokenized Future: Assets in the Digital Age",
+      "Quantum Finance: Where Technology Meets Money",
+      "Digital Renaissance: Art and Technology Converge",
+      "The Trust Protocol: Building the New Internet of Value",
+      "Sovereign Data: Reclaiming Control in the Digital Era",
+      "Metaverse Economics: Virtual Worlds, Real Value",
+      "Algorithmic Governance: The Future of Decision Making",
+    ]
+    return titles[Math.floor(Math.random() * titles.length)]
+  }
+
+  // Helper function to get a random topic
+  const getRandomTopic = (): string => {
+    const topics = ["analysis", "trading", "fundamentals", "data analysis", "technology", "culture", "future"]
+    return topics[Math.floor(Math.random() * topics.length)]
   }
 
   // Function to handle article click
@@ -753,7 +966,41 @@ Market participants should remain vigilant of broader crypto market conditions w
       (!agentSymbol || !article.agentSymbol || article.agentSymbol === agentSymbol),
   )
 
-  const topics = ["analysis", "trading", "fundamentals", "data analysis"]
+  // Add a deleteArticle function before the return statement, after the filteredArticles constant
+  const deleteArticle = (articleId: number) => {
+    // Prevent event bubbling when clicking delete button
+    const handleDeleteClick = (e: React.MouseEvent) => {
+      e.stopPropagation()
+
+      // Find the article to check if it's a default article or agent article
+      const articleToDelete = allArticles.find((article) => article.id === articleId)
+
+      if (articleToDelete) {
+        if (articleToDelete.isDefault) {
+          // If it's a default article, update mockArticles
+          const updatedMockArticles = mockArticles.filter((article) => article.id !== articleId)
+          setMockArticles(updatedMockArticles)
+          localStorage.setItem("mock-articles", JSON.stringify(updatedMockArticles))
+        } else {
+          // If it's an agent article, update agentArticles
+          const updatedAgentArticles = agentArticles.filter((article) => article.id !== articleId)
+          setAgentArticles(updatedAgentArticles)
+          localStorage.setItem(`agent-${agentId}-articles`, JSON.stringify(updatedAgentArticles))
+        }
+      }
+
+      // Close the dialog if the deleted article is currently selected
+      if (selectedArticle?.id === articleId || newArticle?.id === articleId) {
+        setShowArticleDialog(false)
+        setSelectedArticle(null)
+        setNewArticle(null)
+      }
+    }
+
+    return handleDeleteClick
+  }
+
+  const topics = ["analysis", "trading", "fundamentals", "data analysis", "technology", "culture", "future"]
 
   return (
     <div className="container mx-auto px-4 py-8 bg-black text-white">
@@ -813,10 +1060,24 @@ Market participants should remain vigilant of broader crypto market conditions w
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredArticles.length > 0 ? (
           filteredArticles.map((article) => (
-            <div key={article.id} onClick={() => handleArticleClick(article)} className="cursor-pointer">
-              <Card className="bg-[#2F2F2F] border-gray-700 hover:bg-gray-700 transition-colors h-full">
+            <div key={article.id} className="relative">
+              <Card
+                className="bg-[#2F2F2F] border-gray-700 hover:bg-gray-700 transition-colors h-full cursor-pointer"
+                onClick={() => handleArticleClick(article)}
+              >
                 <CardHeader>
-                  <CardTitle className="text-white">{article.title}</CardTitle>
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-white pr-8">{article.title}</CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-2 right-2 text-gray-400 hover:text-red-500 hover:bg-transparent"
+                      onClick={deleteArticle(article.id)}
+                      aria-label="Delete article"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </Button>
+                  </div>
                   {article.date && <p className="text-sm text-gray-400">Published: {article.date}</p>}
                 </CardHeader>
                 <CardContent>
@@ -847,7 +1108,18 @@ Market participants should remain vigilant of broader crypto market conditions w
       <Dialog open={showArticleDialog} onOpenChange={setShowArticleDialog}>
         <DialogContent className="bg-[#2F2F2F] text-white border-gray-700 max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl md:text-2xl">{(selectedArticle || newArticle)?.title}</DialogTitle>
+            <div className="flex justify-between items-start">
+              <DialogTitle className="text-xl md:text-2xl">{(selectedArticle || newArticle)?.title}</DialogTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-gray-400 hover:text-red-500 hover:bg-transparent"
+                onClick={deleteArticle((selectedArticle || newArticle)?.id || 0)}
+                aria-label="Delete article"
+              >
+                <Trash2 className="h-5 w-5" />
+              </Button>
+            </div>
             {(selectedArticle || newArticle)?.date && (
               <p className="text-sm text-gray-400">Published: {(selectedArticle || newArticle)?.date}</p>
             )}

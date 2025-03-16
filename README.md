@@ -1,3 +1,4 @@
+````bash
 # AIent - AI Agent Marketplace
 
 ### Comprehensive Analysis of TradeGPT Launchpad Project
@@ -7,7 +8,6 @@
 TradeGPT Launchpad is a platform for creating, managing, and trading AI agents. It's built with Next.js using the App Router architecture and integrates with a PostgreSQL database via Prisma ORM.
 The application provides user authentication, AI agent creation and management, a marketplace for AI agents, and an AI assistant for trading insights.
 
-—————————————————————————
 ## 🌟 Features
 
 - 🔐 User authentication with JWT and secure session management
@@ -18,7 +18,6 @@ The application provides user authentication, AI agent creation and management, 
 - 🌓 Dark/Light mode support
 - 📱 Responsive design
 
-—————————————————————————
 ## 🚀 Tech Stack
 
 - **Framework:** Next.js 14 (App Router)
@@ -32,7 +31,6 @@ The application provides user authentication, AI agent creation and management, 
 - **Email Service:** Mailgun
 - **AI Integration:** OpenAI API
 
-—————————————————————————
 ## 📁 Project Structure
 
 aient/
@@ -59,7 +57,6 @@ aient/
 └── types/                # TypeScript type definitions
 
 
-—————————————————————————
 ## 📦 Installation
 
 sudo apt update && sudo apt upgrade -y
@@ -69,6 +66,8 @@ sudo apt install git curl -y
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 
 sudo apt install -y nodejs
+
+sudo npm install
 
 sudo npm install -g pnpm
 
@@ -83,9 +82,7 @@ git clone https://([privateKey])@github.com/ichidokiri/Launchpad-AIent.git
 
 cd Launchpad-AIent
 
-nano .env  # copy .env to the current folder
-
-pnpm install
+nano .env  // copy .env to the current folder
 
 sudo apt update && sudo apt install postgresql postgresql-contrib -y
 
@@ -95,15 +92,15 @@ sudo systemctl enable postgresql  # Enable it to start on boot
 
 sudo systemctl status postgresql  # Check if it’s running
 
-sudo -i -u postgres
+sudo -i -u postgres // psql -U postgres
 
 psql
 
 CREATE DATABASE launchpad_database;
 
-ALTER USER postgres WITH PASSWORD 'Prisma,.Postgre11';
-
 \q
+
+pnpm install
 
 pnpm prisma generate
 
@@ -112,6 +109,8 @@ pnpm prisma db push
 pnpm build
 
 pnpm start
+
+(tsc --noEmit)
 
 (pnpm dev)
 
@@ -193,7 +192,6 @@ pnpm build
 
 pnpm start
 
-—————————————————————————
 ## 🗑️ Cache Cleaning Steps
 
 pnpm run clean
@@ -215,7 +213,6 @@ If the automated script doesn't work, you can manually clean the Next.js cache w
    Remove-Item -Path .next -Recurse -Force -ErrorAction SilentlyContinue
    Remove-Item -Path node_modules/.cache -Recurse -Force -ErrorAction SilentlyContinue
 
-—————————————————————————
 
 ## 🩺 Health Check
 
@@ -223,7 +220,6 @@ node scripts/check-db.js
 
 tsc --noEmit
 
-—————————————————————————
 ## 🚀 New Deploy
 
 sudo -u postgres psql
@@ -232,11 +228,10 @@ sudo -u postgres psql -c "CREATE DATABASE launchpad_database;"
 
 sudo -u postgres psql -c "CREATE USER launchpad_user WITH ENCRYPTED PASSWORD 'Prisma,.Postgre11';"
 
-npx prisma generate
+pnpm prisma generate
 
-npx prisma migrate dev --name init
+pnpm prisma db push
 
-—————————————————————————
 
 ## 🔄 Update
 
@@ -248,7 +243,6 @@ pnpm build
 
 pnpm start
 
-—————————————————————————
 ## 🗄️Database Reset
 
 
@@ -256,19 +250,18 @@ pnpm start
 rm -rf prisma/migrations/*
 
 ### 2. Reset Prisma's migration history
-npx prisma migrate reset --force
+pnpm prisma migrate reset --force
 
 ### 3. Create a fresh initial migration
-npx prisma migrate dev --name init
+pnpm prisma migrate dev --name init
 
 ### 4. Apply the migration to your database
-npx prisma migrate deploy
+pnpm prisma migrate deploy
 
 ### 5. Generate Prisma client
-npx prisma generate
+pnpm prisma generate
 
 
-—————————————————————————
 
 ## TODO: Update New Features
 
@@ -319,7 +312,3 @@ npx prisma generate
 - Create comprehensive documentation for Web3 features
 - Build tutorials for users new to blockchain
 - Document the API for developers
-
-—————————————————————————
-
-

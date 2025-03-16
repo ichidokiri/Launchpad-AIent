@@ -45,6 +45,19 @@ export const authOptions = {
   // Add any necessary options here
 }
 
+export async function get(token?: string): Promise<string | null> {
+  if (!token) {
+    const cookieStore = await cookies()
+    token = cookieStore.get("authToken")?.value || cookieStore.get("token")?.value
+  }
+
+  if (!token) {
+    return null
+  }
+
+  return token
+}
+
 /**
  * Verify JWT token from cookies or authorization header
  * @param request Request or NextRequest object
@@ -65,8 +78,7 @@ async function verifyToken(request?: Request | NextRequest): Promise<TokenPayloa
 
     // If no token in header, try both cookie names
     if (!token) {
-      const cookieStore = cookies()
-      token = cookieStore.get("authToken")?.value || cookieStore.get("token")?.value
+      token = await get()
     }
 
     if (!token) {
